@@ -1,7 +1,6 @@
 extern crate regex;
 // TODO:
-//  * Test for multiple tag regex
-//  * Remove tag from subject
+//  * Extract tag determination to a different function
 
 use self::regex::Regex;
 
