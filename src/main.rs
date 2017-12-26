@@ -3,6 +3,8 @@ extern crate regex;
 //  * Changelog to have two sections:
 //    1. Stories summary
 //    2. All the commits by tag
+//  * Create a Markdown formatter
+//  * Add proper claprs
 
 use std::env;
 use std::process::{Command, Output};
