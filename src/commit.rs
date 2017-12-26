@@ -5,7 +5,7 @@ extern crate regex;
 use self::regex::Regex;
 
 #[derive(Debug)]
-struct Commit {
+pub struct Commit {
   tag: String,
   hash: String,
   subject: String,
