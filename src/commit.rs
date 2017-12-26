@@ -4,12 +4,14 @@ extern crate regex;
 
 use self::regex::Regex;
 
+pub type Commits = Vec<Commit>;
+
 #[derive(Debug)]
 pub struct Commit {
-  tag: String,
-  hash: String,
-  subject: String,
-  author: String
+  pub tag: String,
+  pub hash: String,
+  pub subject: String,
+  pub author: String
 }
 
 impl Commit {
