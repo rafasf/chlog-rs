@@ -6,7 +6,7 @@ use self::regex::Regex;
 
 pub type Commits = Vec<Commit>;
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Commit {
   pub tag: String,
   pub hash: String,

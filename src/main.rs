@@ -1,7 +1,5 @@
 extern crate regex;
 // TODO;
-//  * Print Changelog having the range and date as title
-//    * And the commits grouped by tag
 //  * Changelog to have two sections:
 //    1. Stories summary
 //    2. All the commits by tag
@@ -22,7 +20,7 @@ fn main() {
   let range = &args[2];
 
   // User config
-  let tags_re = Regex::new("^none").unwrap();
+  let tags_re = Regex::new(r"^(feat):\s*|^(chore):\s*|^(test):\s*").unwrap();
 
   // App config
   let separator = "|";
@@ -39,7 +37,11 @@ fn main() {
 
   let change = Changelog::create(some_stuff, range);
 
-  println!("{:?}", change);
+  println!("## {:?}, {}", change.title, change.created_at);
+  for (tag, commits) in change.commits_by_tag() {
+    println!("### {:?}", tag);
+    commits.iter().for_each(|commit| println!("* {} ({})", commit.subject, commit.hash))
+  }
 }
 
 fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
