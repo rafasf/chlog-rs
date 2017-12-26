@@ -1,4 +1,5 @@
 extern crate regex;
+extern crate clap;
 // TODO;
 //  * Changelog to have two sections:
 //    1. Stories summary
@@ -9,6 +10,7 @@ extern crate regex;
 use std::env;
 use std::process::{Command, Output};
 use regex::Regex;
+use clap::{Arg, App};
 
 pub mod commit;
 pub mod changelog;
@@ -17,9 +19,27 @@ use commit::{Commit, Commits};
 use changelog::Changelog;
 
 fn main() {
-  let args: Vec<String> = env::args().collect();
-  let repository_dir = &args[1];
-  let range = &args[2];
+  let matches = App::new("Changelog")
+    .version("0.1.0")
+    .arg(Arg::with_name("repository")
+         .short("r")
+         .long("repository")
+         .value_name("repository path")
+         .help("The path to the repository")
+         .required(true)
+         .takes_value(true))
+    .arg(Arg::with_name("range")
+         .long("range")
+         .value_name("initial-hash..final-hash")
+         .help("Range of commits to include (using Git style from..to)")
+         .takes_value(true))
+    .get_matches();
+
+  let repository_dir = matches.value_of("repository").unwrap();
+  let range = match matches.value_of("range") {
+    Some(range) => range,
+    None => "HEAD"
+  };
 
   // User config
   let tags_re = Regex::new(r"^(feat):\s*|^(chore):\s*|^(test):\s*").unwrap();
