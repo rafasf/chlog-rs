@@ -5,7 +5,6 @@ extern crate clap;
 //    1. Stories summary
 //    2. All the commits by tag
 //  * Create a Markdown formatter
-//  * Add proper claprs
 
 use std::env;
 use std::process::{Command, Output};
@@ -14,9 +13,11 @@ use clap::{Arg, App};
 
 pub mod commit;
 pub mod changelog;
+pub mod fmt;
 
 use commit::{Commit, Commits};
 use changelog::Changelog;
+use fmt::markdown;
 
 fn main() {
   let matches = App::new("Changelog")
@@ -57,13 +58,7 @@ fn main() {
     .map(|raw_commit| Commit::from(raw_commit, separator, &tags_re))
     .collect();
 
-  let change = Changelog::create(some_stuff, range);
-
-  println!("## {:?}, {}", change.title, change.created_at);
-  for (tag, commits) in change.commits_by_tag() {
-    println!("### {:?}", tag);
-    commits.iter().for_each(|commit| println!("* {} ({})", commit.subject, commit.hash))
-  }
+  markdown::create_from(&Changelog::create(some_stuff, range));
 }
 
 fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
