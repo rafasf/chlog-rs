@@ -1,7 +1,8 @@
 extern crate regex;
 extern crate chrono;
 
-use std::collections::HashMap;
+use regex::Regex;
+use std::collections::{HashMap, HashSet};
 use changelog::chrono::prelude::*;
 use commit::{Commit, Commits};
 
@@ -32,15 +33,22 @@ impl Changelog {
     commits_by_tag.clone()
   }
 
-  pub fn stories(&self) -> Vec<String> {
-    unimplemented!();
+  pub fn stories(&self, story_re: &Regex) -> HashSet<String> {
+    let stories: Vec<String> = self.commits
+      .iter()
+      .filter(|commit| story_re.is_match(&commit.tag))
+      .map(|commit| commit.tag.clone())
+      .collect();
+
+    stories.into_iter().collect()
   }
 }
 
 mod test {
-  use changelog::Changelog;
+  use regex::Regex;
   use commit::Commit;
-  use std::collections::HashMap;
+  use changelog::Changelog;
+  use std::collections::{HashMap, HashSet};
 
   #[test]
   fn returns_commits_grouped_by_tag() {
@@ -60,5 +68,27 @@ mod test {
       vec![commits[1].clone()]);
 
     assert_eq!(expected_groups, changelog.commits_by_tag());
+  }
+
+  #[test]
+  fn returns_unique_stories_given_a_pattern() {
+    let story_re = Regex::new(r"^(US\w+)").unwrap();
+    let commits = vec![
+      Commit { tag: "US0192".into(), subject: "".into(), author: "".into(), hash: "".into() },
+      Commit { tag: "doc".into(), subject: "".into(), author: "".into(), hash: "".into() },
+      Commit { tag: "US213".into(), subject: "".into(), author: "".into(), hash: "".into() },
+      Commit { tag: "US0192".into(), subject: "".into(), author: "".into(), hash: "".into() }
+    ];
+
+    let changelog = Changelog::create(commits.clone(), "");
+
+    let expected_stories: HashSet<String> = vec![
+      "US0192".into(),
+      "US213".into()
+    ]
+    .into_iter()
+    .collect();
+
+    assert_eq!(expected_stories, changelog.stories(&story_re));
   }
 }

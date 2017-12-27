@@ -6,7 +6,6 @@ extern crate clap;
 //    2. All the commits by tag
 //  * Create a Markdown formatter
 
-use std::env;
 use std::process::{Command, Output};
 use regex::Regex;
 use clap::{Arg, App};
