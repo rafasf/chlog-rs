@@ -57,7 +57,9 @@ fn main() {
     .map(|raw_commit| Commit::from(raw_commit, separator, &tags_re))
     .collect();
 
-  markdown::create_from(&Changelog::create(some_stuff, range));
+  markdown::create(
+    &Changelog::create(some_stuff, range),
+    &Regex::new(r"^test").unwrap());
 }
 
 fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
