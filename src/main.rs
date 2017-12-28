@@ -68,6 +68,7 @@ fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
     .arg(repository_dir)
     .arg("log")
     .arg("--oneline")
+    .arg("--no-merges")
     .arg(format)
     .arg(range)
     .output()
