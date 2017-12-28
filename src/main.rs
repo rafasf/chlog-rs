@@ -42,7 +42,7 @@ fn main() {
   };
 
   // User config
-  let tags_re = Regex::new(r"^(feat):\s*|^(chore):\s*|^(test):\s*").unwrap();
+  let tags_re = Regex::new(r"^(US\w+)\s*|^(feat):\s*|^(chore):\s*|^(test):\s*").unwrap();
 
   // App config
   let separator = "|";
@@ -59,7 +59,7 @@ fn main() {
 
   markdown::create(
     &Changelog::create(some_stuff, range),
-    &Regex::new(r"^test").unwrap());
+    &Regex::new(r"^US\w+").unwrap());
 }
 
 fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
