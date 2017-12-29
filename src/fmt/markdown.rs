@@ -3,16 +3,16 @@ extern crate regex;
 use std::error::Error;
 use std::io::prelude::*;
 use std::fs::File;
-use std::path::Path;
+use std::path::{Path, Display};
 use regex::Regex;
 use changelog::Changelog;
 
-pub fn create(changelog: &Changelog, story_re: &Regex) {
+pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
   let file_path = Path::new("CHANGELOG.md");
 
   let mut file = match File::create(&file_path) {
     Ok(file) => file,
-    Err(e) => panic!("couldn't create file: {}", e.description())
+    Err(e) => panic!("couldn't create file {}: {}", file_path.display(), e.description())
   };
 
   writeln!(file, "## {} @ {}", changelog.title, changelog.created_at);
@@ -32,5 +32,7 @@ pub fn create(changelog: &Changelog, story_re: &Regex) {
         writeln!(file, "* {} ({})", commit.subject, commit.hash);
       });
   }
+
+  file_path.display()
 }
 

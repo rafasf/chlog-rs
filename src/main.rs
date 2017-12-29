@@ -1,14 +1,11 @@
 extern crate regex;
 extern crate clap;
-// TODO;
-//  * Changelog to have two sections:
-//    1. Stories summary
-//    2. All the commits by tag
-//  * Create a Markdown formatter
+extern crate ansi_term;
 
 use std::process::{Command, Output};
 use regex::Regex;
 use clap::{Arg, App};
+use ansi_term::{ANSIGenericString, Style};
 
 pub mod commit;
 pub mod changelog;
@@ -48,7 +45,10 @@ fn main() {
   let separator = "|";
   let format = format!("--pretty=format:%s{s}%an{s}%h", s = separator);
 
-  println!("Getting log in: {:?}", repository_dir);
+  println!(
+    "{} Fetching log in {}",
+    chlog_prefix(),
+    Style::new().bold().paint(repository_dir));
 
   let output = fetch_log(&repository_dir, &format, &range);
 
@@ -57,9 +57,14 @@ fn main() {
     .map(|raw_commit| Commit::from(raw_commit, separator, &tags_re))
     .collect();
 
-  markdown::create(
+  let changelog_file = markdown::create(
     &Changelog::create(some_stuff, range),
     &Regex::new(r"^US\w+").unwrap());
+
+  println!(
+    "{} {} created!",
+    chlog_prefix(),
+    Style::new().bold().paint(changelog_file.to_string()));
 }
 
 fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
@@ -73,4 +78,8 @@ fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
     .arg(range)
     .output()
     .unwrap_or_else(|e| panic!("Failed to get commits: {}", e))
+}
+
+fn chlog_prefix<'a>() -> ANSIGenericString<'a, str> {
+  Style::new().bold().paint("chlog:")
 }
