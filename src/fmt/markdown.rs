@@ -25,7 +25,11 @@ pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
     });
 
   for (tag, commits) in changelog.commits_by_tag() {
-    writeln!(file, "\n#### {}", tag);
+    match tag.is_empty() {
+      true => writeln!(file, "\n#### General"),
+      false => writeln!(file, "\n#### {}", tag)
+    };
+
     commits
       .iter()
       .for_each(|commit| {
