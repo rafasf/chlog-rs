@@ -12,7 +12,10 @@ pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
 
   let mut file = match File::create(&file_path) {
     Ok(file) => file,
-    Err(e) => panic!("couldn't create file {}: {}", file_path.display(), e.description())
+    Err(e) => panic!(
+      "couldn't create file {}: {}",
+      file_path.display(),
+      e.description())
   };
 
   writeln!(file, "## {} @ {}", changelog.title, changelog.created_at);

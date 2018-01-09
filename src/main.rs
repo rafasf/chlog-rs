@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate serde_derive;
+
 extern crate regex;
 extern crate clap;
 extern crate ansi_term;
@@ -10,10 +13,12 @@ use ansi_term::{ANSIGenericString, Style};
 pub mod commit;
 pub mod changelog;
 pub mod fmt;
+pub mod tracker;
 
 use commit::{Commit, Commits};
 use changelog::Changelog;
 use fmt::markdown;
+use tracker::rally;
 
 fn main() {
   let matches = App::new("Changelog")
@@ -44,6 +49,8 @@ fn main() {
   // App config
   let separator = "|";
   let format = format!("--pretty=format:%s{s}%an{s}%h", s = separator);
+
+  println!("{:?}", rally::name_of("US11604"));
 
   println!(
     "{} Fetching log in {}",
