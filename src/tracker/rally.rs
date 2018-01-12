@@ -23,7 +23,7 @@ impl Story {
         }
     }
 
-    fn empty_with<T: Into<String>>(id: T) -> Story {
+    fn only_with<T: Into<String>>(id: T) -> Story {
         Story::new(id, None, None)
     }
 }
@@ -80,7 +80,7 @@ pub fn name_of(story_number: &str) -> Story {
 
     match response {
         Ok(mut r) => story_from(r.json(), &story_number),
-        Err(e) => Story::empty_with(story_number),
+        Err(e) => Story::only_with(story_number),
     }
 }
 
@@ -94,6 +94,6 @@ fn story_from(body: reqwest::Result<QueryResponse>, story_number: &str) -> Story
                 result.first().internal_id()
             )),
         ),
-        Err(e) => Story::empty_with(story_number),
+        Err(e) => Story::only_with(story_number),
     }
 }
