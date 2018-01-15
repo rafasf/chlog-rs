@@ -113,12 +113,9 @@ fn http_client() -> reqwest::Client {
 }
 
 fn proxy_config() -> Option<reqwest::Proxy> {
-  let http_proxy = match env::var("http_proxy") {
-    Ok(proxy) => Some(reqwest::Proxy::http(&proxy).unwrap()),
-    _ => None
-  };
-
-  http_proxy
+  env::var("http_proxy")
+    .map(|value| reqwest::Proxy::http(&value).unwrap())
+    .ok()
 }
 
 fn credentials() -> Option<reqwest::header::Headers> {
