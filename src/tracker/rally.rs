@@ -2,7 +2,6 @@
 
 // TODO:
 //  * Move Story out of here
-//  * Accept credentials as arguments or environment variables
 extern crate core;
 extern crate reqwest;
 extern crate serde;
@@ -87,9 +86,7 @@ pub fn name_of(story_number: &str) -> Story {
     println!("using: {:?}", query_url);
 
     let client = http_client();
-    let response = client.get(&query_url)
-     .basic_auth("-", Some("--"))
-     .send();
+    let response = client.get(&query_url).send();
 
     let story = match response {
         Ok(mut r) => story_from(r.json()),
@@ -108,6 +105,10 @@ fn http_client() -> reqwest::Client {
     client.proxy(proxy);
   }
 
+  if let Some(headers) = credentials() {
+    client.default_headers(headers);
+  }
+
   client.build().unwrap()
 }
 
@@ -118,6 +119,27 @@ fn proxy_config() -> Option<reqwest::Proxy> {
   };
 
   http_proxy
+}
+
+fn credentials() -> Option<reqwest::header::Headers> {
+  let username = env::var("RALLY_USER").ok();
+  let password = env::var("RALLY_PWD").ok();
+
+  if (username.is_some() && password.is_some()) {
+    let mut headers = reqwest::header::Headers::new();
+
+    headers.set(
+      reqwest::header::Authorization(
+        reqwest::header::Basic {
+          username: username.unwrap(),
+          password: password
+        })
+      );
+
+    Some(headers)
+  } else {
+    None
+  }
 }
 
 fn story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
