@@ -1,10 +1,16 @@
 #![allow(non_snake_case)]
 
+// TODO:
+//  * Support use of system proxy
+//  * Move Story out of here
+//  * Accept credentials as arguments or environment variables
+extern crate core;
 extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
 
-use std::io::Read;
+use std::io::{Error, ErrorKind, Read};
+use self::core::result;
 use self::serde_json::Value;
 
 #[derive(Debug)]
@@ -24,9 +30,11 @@ impl Story {
     }
 
     fn only_with<T: Into<String>>(id: T) -> Story {
-        Story::new(id, None, None)
+        Story::new(id.into(), None, None)
     }
 }
+
+const URL: &str = "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement";
 
 #[derive(Deserialize, Debug)]
 struct Result {
@@ -64,36 +72,49 @@ impl QueryResponse {
     fn first(&self) -> &Result {
         &self.QueryResult.Results[0]
     }
-}
 
-pub fn name_of(story_number: &str) -> Story {
-    let rally1_url = "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement";
-    let url = format!(
-        "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
-        rally1_url, story_number
-    );
-
-    println!("using: {:?}", url);
-
-    let client = reqwest::Client::new();
-    let response = client.get(&url).basic_auth("-", Some("--")).send();
-
-    match response {
-        Ok(mut r) => story_from(r.json(), &story_number),
-        Err(e) => Story::only_with(story_number),
+    fn has_results(&self) -> bool {
+      self.QueryResult.TotalResultCount > 0
     }
 }
 
-fn story_from(body: reqwest::Result<QueryResponse>, story_number: &str) -> Story {
+pub fn name_of(story_number: &str) -> Story {
+    let query_url = format!(
+      "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
+      URL,
+      story_number);
+
+    println!("using: {:?}", query_url);
+
+    let client = reqwest::Client::new();
+    let response = client.get(&query_url)
+      .basic_auth("-", Some("--"))
+      .send();
+
+    let story = match response {
+        Ok(mut r) => story_from(r.json()),
+        Err(e) => {
+          Err(Error::new(ErrorKind::Other, e))
+        }
+    };
+
+    story.unwrap_or(Story::only_with(story_number))
+}
+
+fn story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
     match body {
-        Ok(result) => Story::new(
-            result.first().id().to_string(),
-            Some(result.first().name().to_string()),
-            Some(format!(
-                "https://rally1.rallydev.com/#/detail/userstory/{}",
-                result.first().internal_id()
-            )),
-        ),
-        Err(e) => Story::only_with(story_number),
+        Ok(result) => {
+          if (result.has_results()) {
+            Ok(Story::new(
+              result.first().id(),
+              Some(result.first().name().to_string()),
+              Some(format!("https://rally1.rallydev.com/#/detail/userstory/{}", result.first().internal_id()))))
+          } else {
+            Err(Error::new(ErrorKind::Other, "no stories were found"))
+          }
+        },
+        Err(e) => {
+          Err(Error::new(ErrorKind::Other, e))
+        }
     }
 }
