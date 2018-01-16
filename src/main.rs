@@ -54,8 +54,6 @@ fn main() {
     let separator = "|";
     let format = format!("--pretty=format:%s{s}%an{s}%h", s = separator);
 
-    println!("{:?}", rally::name_of("US11604"));
-
     println!(
         "{} Fetching log in {}",
         chlog_prefix(),
