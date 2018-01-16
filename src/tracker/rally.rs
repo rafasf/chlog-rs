@@ -73,15 +73,15 @@ impl QueryResponse {
     }
 
     fn has_results(&self) -> bool {
-      self.QueryResult.TotalResultCount > 0
+        self.QueryResult.TotalResultCount > 0
     }
 }
 
 pub fn name_of(story_number: &str) -> Story {
     let query_url = format!(
-      "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
-      URL,
-      story_number);
+        "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
+        URL, story_number
+    );
 
     println!("using: {:?}", query_url);
 
@@ -90,69 +90,66 @@ pub fn name_of(story_number: &str) -> Story {
 
     let story = match response {
         Ok(mut r) => story_from(r.json()),
-        Err(e) => {
-          Err(Error::new(ErrorKind::Other, e))
-        }
+        Err(e) => Err(Error::new(ErrorKind::Other, e)),
     };
 
     story.unwrap_or(Story::only_with(story_number))
 }
 
 fn http_client() -> reqwest::Client {
-  let mut client = reqwest::Client::builder();
+    let mut client = reqwest::Client::builder();
 
-  if let Some(proxy) = proxy_config() {
-    client.proxy(proxy);
-  }
+    if let Some(proxy) = proxy_config() {
+        client.proxy(proxy);
+    }
 
-  if let Some(headers) = credentials() {
-    client.default_headers(headers);
-  }
+    if let Some(headers) = credentials() {
+        client.default_headers(headers);
+    }
 
-  client.build().unwrap()
+    client.build().unwrap()
 }
 
 fn proxy_config() -> Option<reqwest::Proxy> {
-  env::var("http_proxy")
-    .map(|value| reqwest::Proxy::all(&value).unwrap())
-    .ok()
+    env::var("http_proxy")
+        .map(|value| reqwest::Proxy::all(&value).unwrap())
+        .ok()
 }
 
 fn credentials() -> Option<reqwest::header::Headers> {
-  let username = env::var("RALLY_USER").ok();
-  let password = env::var("RALLY_PWD").ok();
+    let username = env::var("RALLY_USER").ok();
+    let password = env::var("RALLY_PWD").ok();
 
-  if (username.is_some() && password.is_some()) {
-    let mut headers = reqwest::header::Headers::new();
+    if (username.is_some() && password.is_some()) {
+        let mut headers = reqwest::header::Headers::new();
 
-    headers.set(
-      reqwest::header::Authorization(
-        reqwest::header::Basic {
-          username: username.unwrap(),
-          password: password
-        })
-      );
+        headers.set(reqwest::header::Authorization(reqwest::header::Basic {
+            username: username.unwrap(),
+            password: password,
+        }));
 
-    Some(headers)
-  } else {
-    None
-  }
+        Some(headers)
+    } else {
+        None
+    }
 }
 
 fn story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
     match body {
         Ok(result) => {
-          if (result.has_results()) {
-            Ok(Story::new(
-              result.first().id(),
-              Some(result.first().name().to_string()),
-              Some(format!("https://rally1.rallydev.com/#/detail/userstory/{}", result.first().internal_id()))))
-          } else {
-            Err(Error::new(ErrorKind::Other, "no stories were found"))
-          }
-        },
-        Err(e) => {
-          Err(Error::new(ErrorKind::Other, e))
+            if (result.has_results()) {
+                Ok(Story::new(
+                    result.first().id(),
+                    Some(result.first().name().to_string()),
+                    Some(format!(
+                        "https://rally1.rallydev.com/#/detail/userstory/{}",
+                        result.first().internal_id()
+                    )),
+                ))
+            } else {
+                Err(Error::new(ErrorKind::Other, "no stories were found"))
+            }
         }
+        Err(e) => Err(Error::new(ErrorKind::Other, e)),
     }
 }

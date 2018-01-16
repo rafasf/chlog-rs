@@ -26,8 +26,14 @@ pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
     changelog.stories(story_re).iter().for_each(|story| {
         let full_story = rally::name_of(&story);
         match full_story.link {
-            Some(link) => writeln!(file, "* [{}]({}) {}", full_story.id, link, full_story.name.unwrap()),
-            None => writeln!(file, "* {}", story)
+            Some(link) => writeln!(
+                file,
+                "* [{}]({}) {}",
+                full_story.id,
+                link,
+                full_story.name.unwrap()
+            ),
+            None => writeln!(file, "* {}", story),
         };
     });
 
