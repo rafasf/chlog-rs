@@ -14,9 +14,9 @@ use self::serde_json::Value;
 
 #[derive(Debug)]
 pub struct Story {
-    id: String,
-    name: Option<String>,
-    link: Option<String>,
+    pub id: String,
+    pub name: Option<String>,
+    pub link: Option<String>,
 }
 
 impl Story {
@@ -114,7 +114,7 @@ fn http_client() -> reqwest::Client {
 
 fn proxy_config() -> Option<reqwest::Proxy> {
   env::var("http_proxy")
-    .map(|value| reqwest::Proxy::http(&value).unwrap())
+    .map(|value| reqwest::Proxy::all(&value).unwrap())
     .ok()
 }
 

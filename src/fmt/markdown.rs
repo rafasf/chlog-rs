@@ -6,6 +6,7 @@ use std::fs::File;
 use std::path::{Display, Path};
 use regex::Regex;
 use changelog::Changelog;
+use tracker::rally;
 
 pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
     let file_path = Path::new("CHANGELOG.md");
@@ -19,11 +20,15 @@ pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
         ),
     };
 
-    writeln!(file, "## {} @ {}", changelog.title, changelog.created_at);
+    writeln!(file, "## {} ({})", changelog.title, changelog.created_at);
 
     writeln!(file, "\n### {}", "Story Summary");
     changelog.stories(story_re).iter().for_each(|story| {
-        writeln!(file, "* {}", story);
+        let full_story = rally::name_of(&story);
+        match full_story.link {
+            Some(link) => writeln!(file, "* [{}]({}) {}", full_story.id, link, full_story.name.unwrap()),
+            None => writeln!(file, "* {}", story)
+        };
     });
 
     for (tag, commits) in changelog.commits_by_tag() {
@@ -33,7 +38,7 @@ pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
         };
 
         commits.iter().for_each(|commit| {
-            writeln!(file, "* {} ({})", commit.subject, commit.hash);
+            writeln!(file, "* {}", commit.subject);
         });
     }
 
