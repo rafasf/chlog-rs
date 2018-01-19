@@ -24,9 +24,9 @@ pub fn create<'a>(
         ),
     };
 
-    writeln!(file, "## {} ({})", changelog.title, changelog.created_at);
+    writeln!(file, "## {} ({})", changelog.title, changelog.created_at).unwrap();
 
-    writeln!(file, "\n### {}", "Story Summary");
+    writeln!(file, "\n### {}", "Story Summary").unwrap();
     changelog
         .stories(story_re)
         .iter()
@@ -40,19 +40,19 @@ pub fn create<'a>(
                     full_story.id,
                     link,
                     full_story.name.unwrap()
-                ),
-                None => writeln!(file, "* {}", story_identifier),
+                ).unwrap(),
+                None => writeln!(file, "* {}", story_identifier).unwrap(),
             };
         });
 
     for (tag, commits) in changelog.commits_by_tag() {
         match tag.is_empty() {
-            true => writeln!(file, "\n#### General"),
-            false => writeln!(file, "\n#### {}", tag),
+            true => writeln!(file, "\n#### General").unwrap(),
+            false => writeln!(file, "\n#### {}", tag).unwrap(),
         };
 
         commits.iter().for_each(|commit| {
-            writeln!(file, "* {}", commit.subject);
+            writeln!(file, "* {}", commit.subject).unwrap();
         });
     }
 

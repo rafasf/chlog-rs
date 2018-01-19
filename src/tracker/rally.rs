@@ -5,9 +5,8 @@ extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
 
-use std::io::{Error, ErrorKind, Read};
+use std::io::{Error, ErrorKind};
 use self::core::result;
-use self::serde_json::Value;
 use story::Story;
 use tracker::client::*;
 
@@ -73,7 +72,7 @@ pub fn details_of(story_identifer: &str) -> Story {
 fn extract_story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
     match body {
         Ok(result) => {
-            if (result.has_results()) {
+            if result.has_results() {
                 Ok(create_story_from(&result))
             } else {
                 Err(Error::new(ErrorKind::Other, "no stories were found"))

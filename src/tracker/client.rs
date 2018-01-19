@@ -28,7 +28,7 @@ fn credentials(username_var: &str, password_var: &str) -> Option<Headers> {
     let username = env::var(username_var).ok();
     let password = env::var(password_var).ok();
 
-    if (username.is_some() && password.is_some()) {
+    if username.is_some() && password.is_some() {
         let mut headers = Headers::new();
 
         headers.set(Authorization(Basic {
