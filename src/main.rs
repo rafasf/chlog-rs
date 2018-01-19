@@ -34,6 +34,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("range")
+                .short("n")
                 .long("range")
                 .value_name("initial-hash..final-hash")
                 .help("Range of commits to include (using Git style from..to)")
