@@ -8,8 +8,12 @@ use regex::Regex;
 use changelog::Changelog;
 use tracker::rally;
 
-pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
-    let file_path = Path::new("CHANGELOG.md");
+pub fn create<'a>(
+    changelog: &Changelog,
+    story_re: &Regex,
+    output_file: Option<&'a str>,
+) -> Display<'a> {
+    let file_path = Path::new(output_file.unwrap_or("CHANGELOG.md"));
 
     let mut file = match File::create(&file_path) {
         Ok(file) => file,

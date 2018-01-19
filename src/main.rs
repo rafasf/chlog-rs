@@ -39,6 +39,14 @@ fn main() {
                 .help("Range of commits to include (using Git style from..to)")
                 .takes_value(true),
         )
+        .arg(
+            Arg::with_name("file")
+                .short("f")
+                .long("file")
+                .value_name("changelog output file name")
+                .help("The name of the file to be created")
+                .takes_value(true),
+        )
         .get_matches();
 
     let repository_dir = matches.value_of("repository").unwrap();
@@ -70,6 +78,7 @@ fn main() {
     let changelog_file = markdown::create(
         &Changelog::create(some_stuff, range),
         &Regex::new(r"^US\w+").unwrap(),
+        matches.value_of("file"),
     );
 
     println!(
