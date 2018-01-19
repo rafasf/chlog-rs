@@ -63,29 +63,33 @@ pub fn details_of(story_identifer: &str) -> Story {
     let response = client.get(&query_url).send();
 
     let story = match response {
-        Ok(mut r) => story_from(r.json()),
+        Ok(mut resp) => extract_story_from(resp.json()),
         Err(e) => Err(Error::new(ErrorKind::Other, e)),
     };
 
     story.unwrap_or(Story::only_with(story_identifer))
 }
 
-fn story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
+fn extract_story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
     match body {
         Ok(result) => {
             if (result.has_results()) {
-                Ok(Story::new(
-                    result.id(),
-                    Some(result.name().to_string()),
-                    Some(format!(
-                        "https://rally1.rallydev.com/#/detail/userstory/{}",
-                        result.internal_id()
-                    )),
-                ))
+                Ok(create_story_from(&result))
             } else {
                 Err(Error::new(ErrorKind::Other, "no stories were found"))
             }
         }
         Err(e) => Err(Error::new(ErrorKind::Other, e)),
     }
+}
+
+fn create_story_from(response: &QueryResponse) -> Story {
+    Story::new(
+        response.id(),
+        Some(response.name().to_string()),
+        Some(format!(
+            "https://rally1.rallydev.com/#/detail/userstory/{}",
+            response.internal_id()
+        )),
+    )
 }
