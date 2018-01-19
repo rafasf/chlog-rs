@@ -20,20 +20,6 @@ struct Result {
     ObjectID: i64,
 }
 
-impl Result {
-    fn name(&self) -> &str {
-        &self.Name
-    }
-
-    fn id(&self) -> &str {
-        &self.FormattedID
-    }
-
-    fn internal_id(&self) -> &i64 {
-        &self.ObjectID
-    }
-}
-
 #[derive(Deserialize, Debug)]
 struct QueryResult {
     TotalResultCount: i64,
@@ -50,18 +36,28 @@ impl QueryResponse {
         &self.QueryResult.Results[0]
     }
 
+    fn name(&self) -> &str {
+        &self.first().Name
+    }
+
+    fn id(&self) -> &str {
+        &self.first().FormattedID
+    }
+
+    fn internal_id(&self) -> &i64 {
+        &self.first().ObjectID
+    }
+
     fn has_results(&self) -> bool {
         self.QueryResult.TotalResultCount > 0
     }
 }
 
-pub fn name_of(story_number: &str) -> Story {
+pub fn details_of(story_identifer: &str) -> Story {
     let query_url = format!(
         "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
-        URL, story_number
+        URL, story_identifer
     );
-
-    println!("using: {:?}", query_url);
 
     let client = http_client("RALLY_USER", "RALLY_PWD");
     let response = client.get(&query_url).send();
@@ -71,20 +67,19 @@ pub fn name_of(story_number: &str) -> Story {
         Err(e) => Err(Error::new(ErrorKind::Other, e)),
     };
 
-    story.unwrap_or(Story::only_with(story_number))
+    story.unwrap_or(Story::only_with(story_identifer))
 }
-
 
 fn story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
     match body {
         Ok(result) => {
             if (result.has_results()) {
                 Ok(Story::new(
-                    result.first().id(),
-                    Some(result.first().name().to_string()),
+                    result.id(),
+                    Some(result.name().to_string()),
                     Some(format!(
                         "https://rally1.rallydev.com/#/detail/userstory/{}",
-                        result.first().internal_id()
+                        result.internal_id()
                     )),
                 ))
             } else {

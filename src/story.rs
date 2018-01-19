@@ -18,4 +18,3 @@ impl Story {
         Story::new(id.into(), None, None)
     }
 }
-

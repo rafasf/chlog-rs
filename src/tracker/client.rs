@@ -41,4 +41,3 @@ fn credentials(username_var: &str, password_var: &str) -> Option<Headers> {
         None
     }
 }
-

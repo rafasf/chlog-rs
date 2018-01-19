@@ -23,19 +23,23 @@ pub fn create<'a>(changelog: &Changelog, story_re: &Regex) -> Display<'a> {
     writeln!(file, "## {} ({})", changelog.title, changelog.created_at);
 
     writeln!(file, "\n### {}", "Story Summary");
-    changelog.stories(story_re).iter().for_each(|story| {
-        let full_story = rally::name_of(&story);
-        match full_story.link {
-            Some(link) => writeln!(
-                file,
-                "* [{}]({}) {}",
-                full_story.id,
-                link,
-                full_story.name.unwrap()
-            ),
-            None => writeln!(file, "* {}", story),
-        };
-    });
+    changelog
+        .stories(story_re)
+        .iter()
+        .for_each(|story_identifier| {
+            let full_story = rally::details_of(&story_identifier);
+
+            match full_story.link {
+                Some(link) => writeln!(
+                    file,
+                    "* [{}]({}) {}",
+                    full_story.id,
+                    link,
+                    full_story.name.unwrap()
+                ),
+                None => writeln!(file, "* {}", story_identifier),
+            };
+        });
 
     for (tag, commits) in changelog.commits_by_tag() {
         match tag.is_empty() {
