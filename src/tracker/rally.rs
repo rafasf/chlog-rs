@@ -5,11 +5,11 @@ extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
 
-use std::env;
 use std::io::{Error, ErrorKind, Read};
 use self::core::result;
 use self::serde_json::Value;
 use story::Story;
+use tracker::client::*;
 
 const URL: &str = "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement";
 
@@ -63,7 +63,7 @@ pub fn name_of(story_number: &str) -> Story {
 
     println!("using: {:?}", query_url);
 
-    let client = http_client();
+    let client = http_client("RALLY_USER", "RALLY_PWD");
     let response = client.get(&query_url).send();
 
     let story = match response {
@@ -74,43 +74,6 @@ pub fn name_of(story_number: &str) -> Story {
     story.unwrap_or(Story::only_with(story_number))
 }
 
-fn http_client() -> reqwest::Client {
-    let mut client = reqwest::Client::builder();
-
-    if let Some(proxy) = proxy_config() {
-        client.proxy(proxy);
-    }
-
-    if let Some(headers) = credentials() {
-        client.default_headers(headers);
-    }
-
-    client.build().unwrap()
-}
-
-fn proxy_config() -> Option<reqwest::Proxy> {
-    env::var("http_proxy")
-        .map(|value| reqwest::Proxy::all(&value).unwrap())
-        .ok()
-}
-
-fn credentials() -> Option<reqwest::header::Headers> {
-    let username = env::var("RALLY_USER").ok();
-    let password = env::var("RALLY_PWD").ok();
-
-    if (username.is_some() && password.is_some()) {
-        let mut headers = reqwest::header::Headers::new();
-
-        headers.set(reqwest::header::Authorization(reqwest::header::Basic {
-            username: username.unwrap(),
-            password: password,
-        }));
-
-        Some(headers)
-    } else {
-        None
-    }
-}
 
 fn story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
     match body {

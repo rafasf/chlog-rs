@@ -19,7 +19,6 @@ mod story;
 use commit::{Commit, Commits};
 use changelog::Changelog;
 use fmt::markdown;
-use tracker::rally;
 
 fn main() {
     let matches = App::new("Changelog")
