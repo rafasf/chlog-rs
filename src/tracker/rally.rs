@@ -1,7 +1,5 @@
 #![allow(non_snake_case)]
 
-// TODO:
-//  * Move Story out of here
 extern crate core;
 extern crate reqwest;
 extern crate serde;
@@ -11,27 +9,7 @@ use std::env;
 use std::io::{Error, ErrorKind, Read};
 use self::core::result;
 use self::serde_json::Value;
-
-#[derive(Debug)]
-pub struct Story {
-    pub id: String,
-    pub name: Option<String>,
-    pub link: Option<String>,
-}
-
-impl Story {
-    fn new<T: Into<String>>(id: T, name: Option<String>, link: Option<String>) -> Story {
-        Story {
-            id: id.into(),
-            name: name,
-            link: link,
-        }
-    }
-
-    fn only_with<T: Into<String>>(id: T) -> Story {
-        Story::new(id.into(), None, None)
-    }
-}
+use story::Story;
 
 const URL: &str = "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement";
 

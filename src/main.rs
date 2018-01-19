@@ -14,6 +14,7 @@ pub mod commit;
 pub mod changelog;
 pub mod fmt;
 pub mod tracker;
+mod story;
 
 use commit::{Commit, Commits};
 use changelog::Changelog;
