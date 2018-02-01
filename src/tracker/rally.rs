@@ -1,13 +1,17 @@
 #![allow(non_snake_case)]
 
 extern crate core;
+extern crate regex;
 extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
 
 use std::io::{Error, ErrorKind};
+use regex::Regex;
 use self::core::result;
+
 use story::Story;
+use tracker::Tracker;
 use tracker::client::*;
 
 const URL: &str = "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement";
@@ -52,21 +56,29 @@ impl QueryResponse {
     }
 }
 
-pub fn details_of(story_identifer: &str) -> Story {
-    let query_url = format!(
-        "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
-        URL, story_identifer
-    );
+pub struct Rally;
 
-    let client = http_client("RALLY_USER", "RALLY_PWD");
-    let response = client.get(&query_url).send();
+impl Tracker for Rally {
+    fn story_id_pattern() -> Regex {
+        Regex::new(r"^US\w+").unwrap()
+    }
 
-    let story = match response {
-        Ok(mut resp) => extract_story_from(resp.json()),
-        Err(e) => Err(Error::new(ErrorKind::Other, e)),
-    };
+    fn details_of(&self, story_identifer: &str) -> Story {
+        let query_url = format!(
+            "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
+            URL, story_identifer
+        );
 
-    story.unwrap_or(Story::only_with(story_identifer))
+        let client = http_client("RALLY_USER", "RALLY_PWD");
+        let response = client.get(&query_url).send();
+
+        let story = match response {
+            Ok(mut resp) => extract_story_from(resp.json()),
+            Err(e) => Err(Error::new(ErrorKind::Other, e)),
+        };
+
+        story.unwrap_or(Story::only_with(story_identifer))
+    }
 }
 
 fn extract_story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {

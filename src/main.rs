@@ -19,6 +19,7 @@ mod story;
 use commit::{Commit, Commits};
 use changelog::Changelog;
 use fmt::markdown;
+use tracker::rally;
 
 fn main() {
     let matches = App::new("Changelog")
@@ -78,7 +79,7 @@ fn main() {
 
     let changelog_file = markdown::create(
         &Changelog::create(some_stuff, range),
-        &Regex::new(r"^US\w+").unwrap(),
+        rally::Rally,
         matches.value_of("file"),
     );
 

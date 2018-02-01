@@ -1,18 +1,15 @@
-extern crate regex;
-
 use std::error::Error;
 use std::io::prelude::*;
 use std::fs::File;
 use std::path::{Display, Path};
-use regex::Regex;
-use changelog::Changelog;
-use tracker::rally;
 
-pub fn create<'a>(
-    changelog: &Changelog,
-    story_re: &Regex,
-    output_file: Option<&'a str>,
-) -> Display<'a> {
+use changelog::Changelog;
+use tracker::Tracker;
+
+pub fn create<'a, T>(changelog: &Changelog, tracker: T, output_file: Option<&'a str>) -> Display<'a>
+where
+    T: Tracker,
+{
     let file_path = Path::new(output_file.unwrap_or("CHANGELOG.md"));
 
     let mut file = match File::create(&file_path) {
@@ -28,10 +25,10 @@ pub fn create<'a>(
 
     writeln!(file, "\n### {}", "Story Summary").unwrap();
     changelog
-        .stories(story_re)
+        .stories(&T::story_id_pattern())
         .iter()
         .for_each(|story_identifier| {
-            let full_story = rally::details_of(&story_identifier);
+            let full_story = tracker.details_of(&story_identifier);
 
             match full_story.link {
                 Some(link) => writeln!(
