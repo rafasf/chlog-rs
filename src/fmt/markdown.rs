@@ -28,15 +28,15 @@ where
         .stories(&T::story_id_pattern())
         .iter()
         .for_each(|story_identifier| {
-            let full_story = tracker.details_of(&story_identifier);
+            let story = tracker.details_of(&story_identifier);
 
-            match full_story.link {
+            match story.link {
                 Some(link) => writeln!(
                     file,
                     "* [{}]({}) {}",
-                    full_story.id,
+                    story.id,
                     link,
-                    full_story.name.unwrap()
+                    story.name.unwrap()
                 ).unwrap(),
                 None => writeln!(file, "* {}", story_identifier).unwrap(),
             };
