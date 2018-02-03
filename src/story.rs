@@ -14,7 +14,10 @@ impl Story {
         }
     }
 
-    pub fn only_with<T: Into<String>>(id: T) -> Story {
+    pub fn only_with<T>(id: T) -> Story
+    where
+        T: Into<String>,
+    {
         Story::new(id.into(), None, None)
     }
 }
