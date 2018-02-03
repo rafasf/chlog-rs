@@ -1,6 +1,4 @@
 extern crate regex;
-// TODO:
-//  * Extract tag determination to a different function
 
 use self::regex::Regex;
 
