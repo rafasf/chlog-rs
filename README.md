@@ -1,10 +1,19 @@
 # chlog-rs
 
-Playing with Rust
+Many projects will have messages with the story identifier as part of the commit message (e.g. `StoryId Commit message here`). In such places, the most valuable part of a changelog is the stories between the changes.
+
+This tools will create a "Story Summary." section listing the unique stories, its titles with a link to the issue tracker followed by a section with the commits that don't belong to any of those and lastly the commits within each of the stories.
+
+## Supported Trackers
+
+### Rally
+
+* Fetches information from `https://rally1.rallydev.com`
+* Requires `RALLY_USER` and `RALLY_PWD` environment variables to be available
 
 ## Usage
 
-```sh
+```
 USAGE:
     chlog-rs [OPTIONS] --repository <repository path>
 
