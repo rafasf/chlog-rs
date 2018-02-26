@@ -8,18 +8,20 @@ extern crate regex;
 use std::process::{Command, Output};
 use regex::Regex;
 use clap::{App, Arg};
-use ansi_term::{ANSIGenericString, Style};
+use ansi_term::Style;
 
 pub mod commit;
 pub mod changelog;
 pub mod fmt;
 pub mod tracker;
 mod story;
+mod show;
 
 use commit::{Commit, Commits};
 use changelog::Changelog;
 use fmt::markdown;
 use tracker::rally;
+use show::*;
 
 fn main() {
     let matches = App::new("Changelog")
@@ -64,11 +66,10 @@ fn main() {
     let separator = "|";
     let format = format!("--pretty=format:%s{s}%an{s}%h", s = separator);
 
-    println!(
-        "{} Fetching log in {}",
-        chlog_prefix(),
+    show(format!(
+        "Fetching log in {}",
         Style::new().bold().paint(repository_dir)
-    );
+    ));
 
     let output = fetch_log(&repository_dir, &format, &range);
 
@@ -83,11 +84,10 @@ fn main() {
         matches.value_of("file"),
     );
 
-    println!(
-        "{} {} created!",
-        chlog_prefix(),
+    show(format!(
+        "{} created!",
         Style::new().bold().paint(changelog_file.to_string())
-    );
+    ));
 }
 
 fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
@@ -101,8 +101,4 @@ fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
         .arg(range)
         .output()
         .unwrap_or_else(|e| panic!("Failed to get commits: {}", e))
-}
-
-fn chlog_prefix<'a>() -> ANSIGenericString<'a, str> {
-    Style::new().bold().paint("chlog:")
 }
