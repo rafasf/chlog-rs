@@ -16,12 +16,14 @@ pub mod fmt;
 pub mod tracker;
 mod story;
 mod show;
+mod config;
 
 use commit::{Commit, Commits};
 use changelog::Changelog;
 use fmt::markdown;
-use tracker::rally;
+use tracker::{rally, Tracker};
 use show::*;
+use config::Config;
 
 fn main() {
     let matches = App::new("Changelog")
@@ -59,8 +61,14 @@ fn main() {
         None => "HEAD",
     };
 
-    // User config
-    let tags_re = Regex::new(r"^(US\w+)\s*|^(feat):\s*|^(chore):\s*|^(test):\s*").unwrap();
+    let config = Config::default();
+
+    let tags_pattern = vec![
+        rally::Rally::story_id_pattern().as_str().to_string(),
+        config.tags_pattern()
+    ].join("|");
+
+    let tags_re = Regex::new(&tags_pattern).unwrap();
 
     // App config
     let separator = "|";

@@ -60,7 +60,7 @@ pub struct Rally;
 
 impl Tracker for Rally {
     fn story_id_pattern() -> Regex {
-        Regex::new(r"^US\w+").unwrap()
+        Regex::new(r"^(US\w+)\s*").unwrap()
     }
 
     fn details_of(&self, story_identifer: &str) -> Story {
