@@ -47,6 +47,7 @@ impl Changelog {
     }
 }
 
+#[cfg(test)]
 mod test {
     use regex::Regex;
     use commit::Commit;
