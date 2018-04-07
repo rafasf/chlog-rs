@@ -1,5 +1,3 @@
-#![allow(non_snake_case)]
-
 extern crate core;
 extern crate regex;
 extern crate reqwest;
@@ -18,41 +16,46 @@ const URL: &str = "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalr
 
 #[derive(Deserialize, Debug)]
 struct Result {
-    Name: String,
-    FormattedID: String,
-    ObjectID: i64,
+    #[serde(rename = "Name")]
+    name: String,
+    #[serde(rename = "FormattedID")]
+    formatted_id: String,
+    #[serde(rename = "ObjectID")]
+    object_id: i64,
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
 struct QueryResult {
-    TotalResultCount: i64,
-    Results: Vec<Result>,
+    total_result_count: i64,
+    results: Vec<Result>,
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
 struct QueryResponse {
-    QueryResult: QueryResult,
+    query_result: QueryResult,
 }
 
 impl QueryResponse {
     fn first(&self) -> &Result {
-        &self.QueryResult.Results[0]
+        &self.query_result.results[0]
     }
 
     fn name(&self) -> &str {
-        &self.first().Name
+        &self.first().name
     }
 
     fn id(&self) -> &str {
-        &self.first().FormattedID
+        &self.first().formatted_id
     }
 
     fn internal_id(&self) -> &i64 {
-        &self.first().ObjectID
+        &self.first().object_id
     }
 
     fn has_results(&self) -> bool {
-        self.QueryResult.TotalResultCount > 0
+        self.query_result.total_result_count > 0
     }
 }
 
