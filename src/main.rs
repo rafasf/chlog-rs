@@ -21,7 +21,7 @@ mod config;
 use commit::{Commit, Commits};
 use changelog::Changelog;
 use fmt::markdown;
-use tracker::{rally, Tracker};
+use tracker::{client, rally, Tracker};
 use show::*;
 use config::Config;
 
@@ -86,9 +86,12 @@ fn main() {
         .map(|raw_commit| Commit::from(raw_commit, separator, &tags_re))
         .collect();
 
+    let rally_tracker = rally::Rally::new(
+        client::http_client("RALLY_USER", "RALLY_PWD"));
+
     let changelog_file = markdown::create(
         &Changelog::create(some_stuff, range),
-        rally::Rally,
+        rally_tracker,
         matches.value_of("file"),
     );
 

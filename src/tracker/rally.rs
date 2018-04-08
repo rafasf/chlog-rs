@@ -5,12 +5,12 @@ extern crate serde;
 extern crate serde_json;
 
 use std::io::{Error, ErrorKind};
-use regex::Regex;
+use self::reqwest::Client;
 use self::core::result;
+use regex::Regex;
 
 use story::Story;
 use tracker::Tracker;
-use tracker::client::*;
 
 const URL: &str = "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement";
 
@@ -59,7 +59,15 @@ impl QueryResponse {
     }
 }
 
-pub struct Rally;
+pub struct Rally {
+    client: Client
+}
+
+impl Rally {
+    pub fn new(client: Client) -> Self {
+        Rally { client: client }
+    }
+}
 
 impl Tracker for Rally {
     fn story_id_pattern() -> Regex {
@@ -72,8 +80,7 @@ impl Tracker for Rally {
             URL, story_identifer
         );
 
-        let client = http_client("RALLY_USER", "RALLY_PWD");
-        let response = client.get(&query_url).send();
+        let response = self.client.get(&query_url).send();
 
         let story = match response {
             Ok(mut resp) => extract_story_from(resp.json()),

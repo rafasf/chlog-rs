@@ -1,6 +1,6 @@
 extern crate regex;
 
-mod client;
+pub mod client;
 pub mod rally;
 
 use regex::Regex;
