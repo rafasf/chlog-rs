@@ -1,6 +1,6 @@
 extern crate regex;
 
-use regex::{Error, Regex};
+use regex::Regex;
 
 #[derive(Debug)]
 pub struct Tag {
