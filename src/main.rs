@@ -108,14 +108,22 @@ fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
         format!("{}/.git", repository_dir)
     };
 
-    Command::new("git")
+    let possible_log = Command::new("git")
         .arg("--git-dir")
-        .arg(git_dir)
+        .arg(&git_dir)
         .arg("log")
         .arg("--oneline")
         .arg("--no-merges")
         .arg(format)
         .arg(range)
         .output()
-        .unwrap_or_else(|e| panic!("Failed to get commits: {}", e))
+        .expect("Failed to interact with Git.");
+
+    if possible_log.status.success() {
+        possible_log
+    } else {
+        show("Unable to get commits, please check the information provided.".to_string());
+        show(format!("Repository: {}, range: {}", &git_dir, range));
+        panic!();
+    }
 }
