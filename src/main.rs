@@ -122,8 +122,8 @@ fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
     if possible_log.status.success() {
         possible_log
     } else {
-        show("Unable to get commits, please check the information provided.".to_string());
-        show(format!("Repository: {}, range: {}", &git_dir, range));
+        show_err("Unable to get commits, please check the information provided.".to_string());
+        show_err(format!("Repository: {}, range: {}", &git_dir, range));
         panic!();
     }
 }
