@@ -20,18 +20,24 @@ impl Tag {
 
 #[derive(Debug)]
 pub struct Config {
-    tags: Vec<Tag>
+    tags: Vec<Tag>,
+    pub format: String,
+    pub separator: String
 }
 
 impl Config {
     pub fn default() -> Self {
+        let separator = "|";
+
         Config {
             tags: vec![
                 Tag::new(r"^(chore):\s*", "Chore"),
                 Tag::new(r"^(doc):\s*", "Documentation"),
                 Tag::new(r"^(style):\s*", "Style"),
                 Tag::new(r"^(refactor):\s*", "Refactor"),
-            ]
+            ],
+            format: format!("--pretty=format:%s{s}%an{s}%h", s = separator),
+            separator: separator.to_string()
         }
     }
 

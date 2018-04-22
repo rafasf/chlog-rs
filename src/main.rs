@@ -66,24 +66,20 @@ fn main() {
     let tags_pattern = vec![
         rally::Rally::story_id_pattern().as_str().to_string(),
         config.tags_pattern()
-    ].join("|");
+    ].join(&config.separator);
 
     let tags_re = Regex::new(&tags_pattern).unwrap();
-
-    // App config
-    let separator = "|";
-    let format = format!("--pretty=format:%s{s}%an{s}%h", s = separator);
 
     show(format!(
         "Fetching log in {}",
         Style::new().bold().paint(repository_dir)
     ));
 
-    let output = fetch_log(&repository_dir, &format, &range);
+    let output = fetch_log(&repository_dir, &config.format, &range);
 
     let some_stuff: Commits = String::from_utf8_lossy(&output.stdout)
         .split("\n")
-        .map(|raw_commit| Commit::from(raw_commit, separator, &tags_re))
+        .map(|raw_commit| Commit::from(raw_commit, &config.separator, &tags_re))
         .collect();
 
     let rally_tracker = rally::Rally::new(
