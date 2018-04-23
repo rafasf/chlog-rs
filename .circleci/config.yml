@@ -1,0 +1,21 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/rust
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+        name: Install Dependencies
+        command: cargo install
+      - run:
+        name: Test
+        command: cargo test
+      - run:
+        name: Package
+        command: cargo build --release
+
