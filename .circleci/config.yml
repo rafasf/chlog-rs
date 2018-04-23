@@ -10,12 +10,12 @@ jobs:
       - checkout
 
       - run:
-        name: Install Dependencies
-        command: cargo install
+          name: Install Dependencies
+          command: cargo install
       - run:
-        name: Test
-        command: cargo test
+          name: Test
+          command: cargo test
       - run:
-        name: Package
-        command: cargo build --release
+          name: Package
+          command: cargo build --release
 
