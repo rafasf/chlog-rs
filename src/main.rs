@@ -5,25 +5,25 @@ extern crate ansi_term;
 extern crate clap;
 extern crate regex;
 
-use std::process::{Command, Output};
-use regex::Regex;
-use clap::{App, Arg};
 use ansi_term::Style;
+use clap::{App, Arg};
+use regex::Regex;
+use std::process::{Command, Output};
 
-pub mod commit;
 pub mod changelog;
-pub mod fmt;
-pub mod tracker;
-mod story;
-mod show;
+pub mod commit;
 mod config;
+pub mod fmt;
+mod show;
+mod story;
+pub mod tracker;
 
-use commit::{Commit, Commits};
 use changelog::Changelog;
-use fmt::markdown;
-use tracker::{client, rally, Tracker};
-use show::*;
+use commit::{Commit, Commits};
 use config::Config;
+use fmt::markdown;
+use show::*;
+use tracker::{client, rally, Tracker};
 
 fn main() {
     let matches = App::new("Changelog")
@@ -65,7 +65,7 @@ fn main() {
 
     let tags_pattern = vec![
         rally::Rally::story_id_pattern().as_str().to_string(),
-        config.tags_pattern()
+        config.tags_pattern(),
     ].join(&config.separator);
 
     let tags_re = Regex::new(&tags_pattern).unwrap();
@@ -82,8 +82,7 @@ fn main() {
         .map(|raw_commit| Commit::from(raw_commit, &config.separator, &tags_re))
         .collect();
 
-    let rally_tracker = rally::Rally::new(
-        client::http_client("RALLY_USER", "RALLY_PWD"));
+    let rally_tracker = rally::Rally::new(client::http_client("RALLY_USER", "RALLY_PWD"));
 
     let changelog_file = markdown::create(
         &Changelog::create(some_stuff, range),

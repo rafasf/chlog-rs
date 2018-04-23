@@ -1,10 +1,10 @@
 extern crate chrono;
 extern crate regex;
 
-use regex::Regex;
-use std::collections::{HashMap, HashSet};
 use changelog::chrono::prelude::*;
 use commit::{Commit, Commits};
+use regex::Regex;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
 pub struct Changelog {
@@ -49,9 +49,9 @@ impl Changelog {
 
 #[cfg(test)]
 mod test {
-    use regex::Regex;
-    use commit::Commit;
     use changelog::Changelog;
+    use commit::Commit;
+    use regex::Regex;
     use std::collections::{HashMap, HashSet};
 
     #[test]

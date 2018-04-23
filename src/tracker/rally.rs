@@ -4,10 +4,10 @@ extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
 
-use std::io::{Error, ErrorKind};
-use self::reqwest::Client;
 use self::core::result;
+use self::reqwest::Client;
 use regex::Regex;
+use std::io::{Error, ErrorKind};
 
 use story::Story;
 use tracker::Tracker;
@@ -60,7 +60,7 @@ impl QueryResponse {
 }
 
 pub struct Rally {
-    client: Client
+    client: Client,
 }
 
 impl Rally {

@@ -5,12 +5,15 @@ use regex::Regex;
 #[derive(Debug)]
 pub struct Tag {
     pattern: String,
-    description: String
+    description: String,
 }
 
 impl Tag {
     pub fn new(pattern: &str, description: &str) -> Self {
-        Tag { pattern: pattern.into(), description: description.into() }
+        Tag {
+            pattern: pattern.into(),
+            description: description.into(),
+        }
     }
 
     fn regex(&self) -> Regex {
@@ -22,7 +25,7 @@ impl Tag {
 pub struct Config {
     tags: Vec<Tag>,
     pub format: String,
-    pub separator: String
+    pub separator: String,
 }
 
 impl Config {
@@ -37,15 +40,12 @@ impl Config {
                 Tag::new(r"^(refactor):\s*", "Refactor"),
             ],
             format: format!("--pretty=format:%s{s}%an{s}%h", s = separator),
-            separator: separator.to_string()
+            separator: separator.to_string(),
         }
     }
 
     pub fn tags_pattern(&self) -> String {
-        let tags: Vec<String> = self.tags
-            .iter()
-            .map(|tag| tag.pattern.clone())
-            .collect();
+        let tags: Vec<String> = self.tags.iter().map(|tag| tag.pattern.clone()).collect();
 
         tags.join("|")
     }
@@ -72,6 +72,7 @@ mod test {
         let config = Config::default();
         assert_eq!(
             r"^(chore):\s*|^(doc):\s*|^(style):\s*|^(refactor):\s*",
-            config.tags_pattern());
+            config.tags_pattern()
+        );
     }
 }

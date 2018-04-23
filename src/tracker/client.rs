@@ -1,8 +1,8 @@
 extern crate reqwest;
 
-use std::env;
-use self::reqwest::{Client, Proxy};
 use self::reqwest::header::{Authorization, Basic, Headers};
+use self::reqwest::{Client, Proxy};
+use std::env;
 
 use show::*;
 

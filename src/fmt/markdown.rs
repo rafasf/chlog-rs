@@ -1,12 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use std::io::prelude::*;
 use std::fs::File;
+use std::io::prelude::*;
 use std::path::{Display, Path};
 
 use changelog::Changelog;
-use tracker::Tracker;
 use commit::Commit;
+use tracker::Tracker;
 
 pub fn create<'a, T>(changelog: &Changelog, tracker: T, output_file: Option<&'a str>) -> Display<'a>
 where
