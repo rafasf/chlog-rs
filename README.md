@@ -1,4 +1,4 @@
-# chlog-rs
+# chlog-rs [![CircleCI](https://circleci.com/gh/rafasf/chlog-rs.svg?style=svg)](https://circleci.com/gh/rafasf/chlog-rs)
 
 Many projects will have messages with the story identifier as part of the commit message (e.g. `StoryId Commit message here`). In such places, the most valuable part of a changelog is the stories between the changes.
 
