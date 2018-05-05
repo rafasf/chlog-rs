@@ -1,7 +1,3 @@
-extern crate regex;
-
-use regex::Regex;
-
 #[derive(Debug)]
 pub struct Tag {
     pattern: String,
@@ -14,10 +10,6 @@ impl Tag {
             pattern: pattern.into(),
             description: description.into(),
         }
-    }
-
-    fn regex(&self) -> Regex {
-        Regex::new(&self.pattern).unwrap()
     }
 }
 
@@ -53,13 +45,7 @@ impl Config {
 
 #[cfg(test)]
 mod test {
-    use config::{Config, Tag};
-
-    #[test]
-    #[should_panic]
-    fn fails_when_regex_is_not_valid() {
-        Tag::new(r"^(chore", "Chore").regex();
-    }
+    use config::Config;
 
     #[test]
     fn creates_with_default_tags() {
