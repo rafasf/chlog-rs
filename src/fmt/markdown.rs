@@ -4,8 +4,8 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Display, Path};
 
-use changelog::Changelog;
-use commit::Commit;
+use thelog::changelog::Changelog;
+use thelog::commit::Commit;
 use tracker::Tracker;
 
 pub fn create<'a, T>(changelog: &Changelog, tracker: T, output_file: Option<&'a str>) -> Display<'a>
