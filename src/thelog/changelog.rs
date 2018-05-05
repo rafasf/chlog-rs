@@ -49,10 +49,10 @@ impl Changelog {
 
 #[cfg(test)]
 mod test {
-    use changelog::Changelog;
-    use commit::Commit;
     use regex::Regex;
     use std::collections::{HashMap, HashSet};
+    use thelog::changelog::Changelog;
+    use thelog::commit::Commit;
 
     #[test]
     fn returns_commits_grouped_by_tag() {

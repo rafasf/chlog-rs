@@ -46,7 +46,7 @@ impl Commit {
 
 #[cfg(test)]
 mod test {
-    use commit::*;
+    use thelog::commit::*;
 
     #[test]
     fn creates_commit_from_string() {
