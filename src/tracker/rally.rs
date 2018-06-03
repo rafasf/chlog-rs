@@ -61,17 +61,25 @@ impl QueryResponse {
 
 pub struct Rally {
     client: Client,
+    pattern: String,
 }
 
 impl Rally {
-    pub fn new(client: Client) -> Self {
-        Rally { client: client }
+    pub fn new(client: Client, _url: String, pattern: String) -> Box<Tracker + 'static> {
+        Box::new(Rally {
+            client: client,
+            pattern: pattern,
+        })
     }
 }
 
 impl Tracker for Rally {
-    fn story_id_pattern() -> Regex {
-        Regex::new(r"^(US\w+)\s*").unwrap()
+    fn pattern(&self) -> &str {
+        &self.pattern
+    }
+
+    fn story_id_pattern(&self) -> Regex {
+        Regex::new(&self.pattern).unwrap()
     }
 
     fn details_of(&self, story_identifer: &str) -> Story {

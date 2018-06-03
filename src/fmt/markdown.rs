@@ -8,10 +8,11 @@ use thelog::changelog::Changelog;
 use thelog::commit::Commit;
 use tracker::Tracker;
 
-pub fn create<'a, T>(changelog: &Changelog, tracker: T, output_file: Option<&'a str>) -> Display<'a>
-where
-    T: Tracker,
-{
+pub fn create<'a>(
+    changelog: &Changelog,
+    tracker: Box<Tracker>,
+    output_file: Option<&'a str>,
+) -> Display<'a> {
     let file_path = Path::new(output_file.unwrap_or("CHANGELOG.md"));
     let file = match File::create(&file_path) {
         Ok(file) => file,
@@ -23,7 +24,11 @@ where
     };
 
     write_title_into(&file, &changelog);
-    write_story_summary_into(&file, &changelog.stories(&T::story_id_pattern()), &tracker);
+    write_story_summary_into(
+        &file,
+        &changelog.stories(&tracker.story_id_pattern()),
+        &tracker,
+    );
     write_commits_into(&file, &changelog.commits_by_tag());
 
     file_path.display()
@@ -33,10 +38,11 @@ fn write_title_into(mut file: &File, changelog: &Changelog) {
     writeln!(file, "## {} ({})", changelog.title, changelog.created_at).unwrap();
 }
 
-fn write_story_summary_into<T>(mut file: &File, story_identifiers: &HashSet<String>, tracker: &T)
-where
-    T: Tracker,
-{
+fn write_story_summary_into(
+    mut file: &File,
+    story_identifiers: &HashSet<String>,
+    tracker: &Box<Tracker>,
+) {
     writeln!(file, "\n### {}", "Story Summary").unwrap();
 
     for story_identifier in story_identifiers {

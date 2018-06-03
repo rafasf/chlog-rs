@@ -22,7 +22,7 @@ use show::*;
 use thelog::changelog::Changelog;
 use thelog::commit::{Commit, Commits};
 use thelog::fetch_log;
-use tracker::{client, rally, Tracker};
+use tracker::{client, jira, rally};
 
 fn main() {
     let matches = App::new("Changelog")
@@ -52,6 +52,23 @@ fn main() {
                 .help("The name of the file to be created")
                 .takes_value(true),
         )
+        .arg(
+            Arg::with_name("tracker")
+                .long("tracker")
+                .value_name("tracker name")
+                .help("Inform which tracker to be used")
+                .required(true)
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("tracker-url")
+                .long("tracker-url")
+                .value_name("tracker URL")
+                .help("The URL for stories lookup")
+                .takes_value(true)
+                .required(true)
+                .requires("tracker"),
+        )
         .get_matches();
 
     let repository_dir = matches.value_of("repository").unwrap();
@@ -59,13 +76,27 @@ fn main() {
         Some(range) => range,
         None => "HEAD",
     };
+    let tracker = matches.value_of("tracker").unwrap();
+    let tracker_url = matches.value_of("tracker-url").unwrap();
+
+    let lookup_tracker = if tracker.to_lowercase() == "jira" {
+        jira::Jira::new(
+            client::http_client("TRACKER_USER", "TRACKER_PWD"),
+            tracker_url.to_string(),
+            r"^(EFFIG-\w+)\s*".to_string(),
+        )
+    } else {
+        rally::Rally::new(
+            client::http_client("TRACKER_USER", "TRACKER_PWD"),
+            "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement".to_string(),
+            r"^(US\w+)\s*".to_string(),
+        )
+    };
 
     let config = Config::default();
 
-    let tags_pattern = vec![
-        rally::Rally::story_id_pattern().as_str().to_string(),
-        config.tags_pattern(),
-    ].join(&config.separator);
+    let tags_pattern =
+        vec![lookup_tracker.pattern().to_string(), config.tags_pattern()].join(&config.separator);
 
     let tags_re = Regex::new(&tags_pattern).unwrap();
 
@@ -81,11 +112,9 @@ fn main() {
         .map(|raw_commit| Commit::from(raw_commit, &config.separator, &tags_re))
         .collect();
 
-    let rally_tracker = rally::Rally::new(client::http_client("RALLY_USER", "RALLY_PWD"));
-
     let changelog_file = markdown::create(
         &Changelog::create(some_stuff, range),
-        rally_tracker,
+        lookup_tracker,
         matches.value_of("file"),
     );
 

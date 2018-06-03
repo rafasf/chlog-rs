@@ -37,7 +37,8 @@ impl Changelog {
     }
 
     pub fn stories(&self, story_re: &Regex) -> HashSet<String> {
-        let stories: Vec<String> = self.commits
+        let stories: Vec<String> = self
+            .commits
             .iter()
             .filter(|commit| story_re.is_match(&commit.tag))
             .map(|commit| commit.tag.clone())

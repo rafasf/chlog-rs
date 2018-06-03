@@ -18,7 +18,8 @@ impl Commit {
         let (raw_subject, author, hash) = (raw_commit[0], raw_commit[1], raw_commit[2]);
 
         let possible_tag = match tags_re.captures(raw_subject) {
-            Some(tag) => tag.iter()
+            Some(tag) => tag
+                .iter()
                 .filter_map(|possible_tag| {
                     if possible_tag.is_some() {
                         possible_tag
