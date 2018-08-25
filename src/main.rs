@@ -71,11 +71,11 @@ fn main() {
         )
         .arg(
             Arg::with_name("pattern")
-            .long("pattern")
-            .value_name("pattern regex")
-            .help("The story pattern")
-            .takes_value(true)
-            .required(true),
+                .long("pattern")
+                .value_name("pattern regex")
+                .help("The story pattern")
+                .takes_value(true)
+                .required(true),
         )
         .get_matches();
 
@@ -106,8 +106,8 @@ fn main() {
 
     let config = Config::default();
 
-    let tags_pattern =
-        vec![lookup_tracker.pattern().to_string(), config.tags_pattern()].join(&config.separator);
+    let tags_pattern = vec![lookup_tracker.pattern().to_string(), config.tags_pattern()]
+        .join(&config.separator);
 
     let tags_re = Regex::new(&tags_pattern).unwrap();
 
@@ -120,7 +120,9 @@ fn main() {
 
     let some_stuff: Commits = String::from_utf8_lossy(&output.stdout)
         .split("\n")
-        .map(|raw_commit| Commit::from(raw_commit, &config.separator, &tags_re))
+        .map(|raw_commit| {
+            Commit::from(raw_commit, &config.separator, &tags_re)
+        })
         .collect();
 
     let changelog_file = markdown::create(

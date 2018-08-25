@@ -26,9 +26,9 @@ impl Changelog {
         let commits_by_tag = &self.commits.iter().fold(
             HashMap::<String, Vec<Commit>>::new(),
             |mut acc, commit| {
-                acc.entry(commit.tag.to_string())
-                    .or_insert(vec![])
-                    .push(commit.clone());
+                acc.entry(commit.tag.to_string()).or_insert(vec![]).push(
+                    commit.clone(),
+                );
                 acc
             },
         );
@@ -37,8 +37,7 @@ impl Changelog {
     }
 
     pub fn stories(&self, story_re: &Regex) -> HashSet<String> {
-        let stories: Vec<String> = self
-            .commits
+        let stories: Vec<String> = self.commits
             .iter()
             .filter(|commit| story_re.is_match(&commit.tag))
             .map(|commit| commit.tag.clone())

@@ -85,7 +85,8 @@ impl Tracker for Rally {
     fn details_of(&self, story_identifer: &str) -> Story {
         let query_url = format!(
             "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
-            URL, story_identifer
+            URL,
+            story_identifer
         );
 
         let response = self.client.get(&query_url).send();

@@ -39,6 +39,7 @@ impl Tracker for Jira {
         Story::new(
             story_identifer,
             Some("".to_string()),
-            Some(format!("{}/{}", &self.url, story_identifer)))
+            Some(format!("{}/{}", &self.url, story_identifer)),
+        )
     }
 }

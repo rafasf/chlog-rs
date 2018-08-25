@@ -16,11 +16,13 @@ pub fn create<'a>(
     let file_path = Path::new(output_file.unwrap_or("CHANGELOG.md"));
     let file = match File::create(&file_path) {
         Ok(file) => file,
-        Err(e) => panic!(
-            "couldn't create file {}: {}",
-            file_path.display(),
-            e.description()
-        ),
+        Err(e) => {
+            panic!(
+                "couldn't create file {}: {}",
+                file_path.display(),
+                e.description()
+            )
+        }
     };
 
     write_title_into(&file, &changelog);
