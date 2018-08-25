@@ -69,6 +69,14 @@ fn main() {
                 .required(true)
                 .requires("tracker"),
         )
+        .arg(
+            Arg::with_name("pattern")
+            .long("pattern")
+            .value_name("pattern regex")
+            .help("The story pattern")
+            .takes_value(true)
+            .required(true),
+        )
         .get_matches();
 
     let repository_dir = matches.value_of("repository").unwrap();
@@ -78,18 +86,21 @@ fn main() {
     };
     let tracker = matches.value_of("tracker").unwrap();
     let tracker_url = matches.value_of("tracker-url").unwrap();
+    let raw_pattern = matches.value_of("pattern").unwrap();
+
+    let story_pattern = format!(r"^({})\s*", raw_pattern);
 
     let lookup_tracker = if tracker.to_lowercase() == "jira" {
         jira::Jira::new(
             client::http_client("TRACKER_USER", "TRACKER_PWD"),
             tracker_url.to_string(),
-            r"^(EFFIG-\w+)\s*".to_string(),
+            story_pattern,
         )
     } else {
         rally::Rally::new(
             client::http_client("TRACKER_USER", "TRACKER_PWD"),
             "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement".to_string(),
-            r"^(US\w+)\s*".to_string(),
+            story_pattern,
         )
     };
 
