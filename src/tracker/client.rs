@@ -21,6 +21,15 @@ pub fn http_client(username_var: &str, password_var: &str) -> Client {
     client.build().unwrap()
 }
 
+pub fn http_client_no_proxy(username_var: &str, password_var: &str) -> Client {
+    let mut client = Client::builder();
+
+    if let Some(headers) = credentials(username_var, password_var) {
+        client.default_headers(headers);
+    }
+
+    client.build().unwrap()
+}
 fn proxy_config() -> Option<Proxy> {
     env::var("http_proxy")
         .map(|value| Proxy::all(&value).unwrap())

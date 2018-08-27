@@ -92,7 +92,7 @@ fn main() {
 
     let lookup_tracker = if tracker.to_lowercase() == "jira" {
         jira::Jira::new(
-            client::http_client("TRACKER_USER", "TRACKER_PWD"),
+            client::http_client_no_proxy("TRACKER_USER", "TRACKER_PWD"),
             tracker_url.to_string(),
             story_pattern,
         )
