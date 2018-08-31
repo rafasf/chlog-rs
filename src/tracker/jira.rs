@@ -14,12 +14,12 @@ use tracker::Tracker;
 
 #[derive(Deserialize, Debug)]
 struct Fields {
-    summary: String
+    summary: String,
 }
 
 #[derive(Deserialize, Debug)]
 struct JiraResponse {
-    fields: Fields
+    fields: Fields,
 }
 
 pub struct Jira {
@@ -54,25 +54,30 @@ impl Tracker for Jira {
 
         let story = match response {
             Ok(mut resp) => extract_story_from(resp.json(), &self.url, story_identifer),
-            Err(e) => Err(Error::new(ErrorKind::Other, e))
+            Err(e) => Err(Error::new(ErrorKind::Other, e)),
         };
 
         story.unwrap_or(Story::new(
             story_identifer,
             Some("".to_string()),
-            Some(format!("{}/browse/{}", &self.url, story_identifer))))
+            Some(format!("{}/browse/{}", &self.url, story_identifer)),
+        ))
     }
-
 }
 
-fn extract_story_from(body: reqwest::Result<JiraResponse>, url: &str, story_identifer: &str) -> result::Result<Story, Error> {
+fn extract_story_from(
+    body: reqwest::Result<JiraResponse>,
+    url: &str,
+    story_identifer: &str,
+) -> result::Result<Story, Error> {
     match body {
         Ok(result) => {
             Ok(Story::new(
                 story_identifer,
                 Some(result.fields.summary.to_string()),
-                Some(format!("{}/browse/{}", url, story_identifer))))
-        },
-        Err(e) => Err(Error::new(ErrorKind::Other, e))
+                Some(format!("{}/browse/{}", url, story_identifer)),
+            ))
+        }
+        Err(e) => Err(Error::new(ErrorKind::Other, e)),
     }
 }
