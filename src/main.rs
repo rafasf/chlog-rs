@@ -22,7 +22,7 @@ use show::*;
 use thelog::changelog::Changelog;
 use thelog::commit::{Commit, Commits};
 use thelog::fetch_log;
-use tracker::{client, jira, rally};
+use tracker::tracker_for;
 
 fn main() {
     let matches = App::new("Changelog")
@@ -84,25 +84,12 @@ fn main() {
         Some(range) => range,
         None => "HEAD",
     };
-    let tracker = matches.value_of("tracker").unwrap();
+    let tracker_name = matches.value_of("tracker").unwrap();
     let tracker_url = matches.value_of("tracker-url").unwrap();
     let raw_pattern = matches.value_of("pattern").unwrap();
 
     let story_pattern = format!(r"^({})\s*", raw_pattern);
-
-    let lookup_tracker = if tracker.to_lowercase() == "jira" {
-        jira::Jira::new(
-            client::http_client_no_proxy("TRACKER_USER", "TRACKER_PWD"),
-            tracker_url.to_string(),
-            story_pattern,
-        )
-    } else {
-        rally::Rally::new(
-            client::http_client("TRACKER_USER", "TRACKER_PWD"),
-            "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement".to_string(),
-            story_pattern,
-        )
-    };
+    let lookup_tracker = tracker_for(tracker_name, tracker_url, story_pattern);
 
     let config = Config::default();
 
@@ -118,7 +105,7 @@ fn main() {
 
     let output = fetch_log(&repository_dir, &config.format, &range);
 
-    let some_stuff: Commits = String::from_utf8_lossy(&output.stdout)
+    let commits: Commits = String::from_utf8_lossy(&output.stdout)
         .split("\n")
         .map(|raw_commit| {
             Commit::from(raw_commit, &config.separator, &tags_re)
@@ -126,7 +113,7 @@ fn main() {
         .collect();
 
     let changelog_file = markdown::create(
-        &Changelog::create(some_stuff, range),
+        &Changelog::create(commits, range),
         lookup_tracker,
         matches.value_of("file"),
     );
