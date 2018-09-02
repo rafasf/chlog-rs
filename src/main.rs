@@ -56,6 +56,7 @@ fn main() {
             Arg::with_name("tracker")
                 .long("tracker")
                 .value_name("tracker name")
+                .possible_values(&["jira", "rally"])
                 .help("Inform which tracker to be used")
                 .required(true)
                 .takes_value(true),
