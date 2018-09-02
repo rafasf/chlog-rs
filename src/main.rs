@@ -88,7 +88,7 @@ fn main() {
     let tracker_url = matches.value_of("tracker-url").unwrap();
     let raw_pattern = matches.value_of("pattern").unwrap();
 
-    let story_pattern = format!(r"^({})\s*", raw_pattern);
+    let story_pattern = format!(r"({})\s*", raw_pattern);
     let lookup_tracker = tracker_for(tracker_name, tracker_url, story_pattern);
 
     let config = Config::default();
@@ -105,8 +105,8 @@ fn main() {
 
     let output = fetch_log(&repository_dir, &config.format, &range);
 
-    let commits: Commits = String::from_utf8_lossy(&output.stdout)
-        .split("\n")
+    let commits: Commits = output
+        .iter()
         .map(|raw_commit| {
             Commit::from(raw_commit, &config.separator, &tags_re)
         })

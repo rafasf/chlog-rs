@@ -31,7 +31,7 @@ impl Config {
                 Tag::new(r"^(style):\s*", "Style"),
                 Tag::new(r"^(refactor):\s*", "Refactor"),
             ],
-            format: format!("--pretty=format:%s{s}%an{s}%h", s = separator),
+            format: format!("--pretty=format:%s{s}%an{s}%h{s}%b", s = separator),
             separator: separator.to_string(),
         }
     }

@@ -1,34 +1,43 @@
 use show::*;
-use std::process::{Command, Output};
+use std::process::Command;
 
 pub mod changelog;
 pub mod commit;
 
-pub fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Output {
+pub fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Vec<String> {
     let git_dir = if repository_dir.contains(".git") {
         repository_dir.to_string()
     } else {
         format!("{}/.git", repository_dir)
     };
 
+    let commit_hashes = Command::new("git")
+        .arg("--git-dir")
+        .arg(&git_dir)
+        .arg("log")
+        .arg("--no-merges")
+        .arg("--pretty=format:%H")
+        .arg(range)
+        .output()
+        .unwrap()
+        .stdout;
+
+    String::from_utf8_lossy(&commit_hashes)
+        .lines()
+        .map(|hash| commit_info_for(hash, &git_dir, format))
+        .collect()
+}
+
+fn commit_info_for(hash: &str, git_dir: &str, format: &str) -> String {
     let possible_log = Command::new("git")
         .arg("--git-dir")
         .arg(&git_dir)
         .arg("log")
-        .arg("--oneline")
-        .arg("--no-merges")
+        .arg(hash)
         .arg(format)
-        .arg(range)
+        .arg("--max-count=1")
         .output()
         .expect("Failed to interact with Git.");
 
-    if possible_log.status.success() {
-        possible_log
-    } else {
-        show_err(
-            "Unable to get commits, please check the information provided.".to_string(),
-        );
-        show_err(format!("Repository: {}, range: {}", &git_dir, range));
-        panic!();
-    }
+    String::from_utf8_lossy(&possible_log.stdout).into_owned()
 }

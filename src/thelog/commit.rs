@@ -15,9 +15,11 @@ pub struct Commit {
 impl Commit {
     pub fn from(raw_commit: &str, separator: &str, tags_re: &Regex) -> Self {
         let raw_commit: Vec<&str> = raw_commit.split(separator).collect();
-        let (raw_subject, author, hash) = (raw_commit[0], raw_commit[1], raw_commit[2]);
+        let (raw_subject, author, hash, body) =
+            (raw_commit[0], raw_commit[1], raw_commit[2], raw_commit[3]);
+        let subject_with_body = format!("{} {}", raw_subject, body);
 
-        let possible_tag = match tags_re.captures(raw_subject) {
+        let possible_tag = match tags_re.captures(&subject_with_body) {
             Some(tag) => {
                 tag.iter()
                     .filter_map(|possible_tag| if possible_tag.is_some() {
@@ -51,7 +53,7 @@ mod test {
     #[test]
     fn creates_commit_from_string() {
         let no_re = Regex::new(r"^none").unwrap();
-        let commit = Commit::from("Sample message here-author-hash", "-", &no_re);
+        let commit = Commit::from("Sample message here-author-hash-body", "-", &no_re);
         let expected_commit = Commit {
             tag: "".to_string(),
             hash: "hash".to_string(),
@@ -67,8 +69,30 @@ mod test {
 
     #[test]
     fn creates_commit_with_tag_from_string() {
-        let tags_re = Regex::new(r"^(US\w+)\s*").unwrap();
-        let commit = Commit::from("US123 Sample message here|author|hash", "|", &tags_re);
+        let tags_re = Regex::new(r"(US\w+)\s*").unwrap();
+        let commit = Commit::from("US123 Sample message here|author|hash|body", "|", &tags_re);
+
+        let expected_commit = Commit {
+            tag: "US123".to_string(),
+            hash: "hash".to_string(),
+            subject: "Sample message here".to_string(),
+            author: "author".to_string(),
+        };
+
+        assert_eq!(expected_commit.tag, commit.tag);
+        assert_eq!(expected_commit.hash, commit.hash);
+        assert_eq!(expected_commit.subject, commit.subject);
+        assert_eq!(expected_commit.author, commit.author);
+    }
+
+    #[test]
+    fn creates_commit_with_tag_from_body() {
+        let tags_re = Regex::new(r"(US\w+)\s*").unwrap();
+        let commit = Commit::from(
+            "Sample message here|author|hash|blah blah\nUS123",
+            "|",
+            &tags_re,
+        );
 
         let expected_commit = Commit {
             tag: "US123".to_string(),
@@ -85,12 +109,14 @@ mod test {
 
     #[test]
     fn creates_with_matching_tag_from_string() {
-        let tags_re = Regex::new(r"^(US\w+)\s*|^(feat):\s*|^(chore):\s*").unwrap();
-        let commit_feat = Commit::from("feat: Sample message here|author|hash", "|", &tags_re);
+        let tags_re = Regex::new(r"(US\w+)\s*|(feat):\s*|(chore):\s*").unwrap();
+        let commit_feat = Commit::from("feat: Sample message here|author|hash|body", "|", &tags_re);
 
-        let commit_story = Commit::from("US123 Sample message here|author|hash", "|", &tags_re);
+        let commit_story =
+            Commit::from("US123 Sample message here|author|hash|body", "|", &tags_re);
 
-        let commit_chore = Commit::from("chore: Sample message here|author|hash", "|", &tags_re);
+        let commit_chore =
+            Commit::from("Sample message here|author|hash|body chore:", "|", &tags_re);
 
         assert_eq!(commit_feat.tag, "feat");
         assert_eq!(commit_feat.subject, "Sample message here");
