@@ -3,6 +3,7 @@ use std::process::Command;
 
 pub mod changelog;
 pub mod commit;
+pub mod tag;
 
 pub fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Vec<String> {
     let git_dir = if repository_dir.contains(".git") {
