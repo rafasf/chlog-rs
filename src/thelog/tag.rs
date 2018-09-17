@@ -19,15 +19,35 @@ impl Tag {
 
 #[derive(Clone, Debug)]
 pub struct TagMatch {
-    tag: Tag,
-    component: Option<String>,
+    pub tag: Tag,
+    pub component: Option<String>,
+}
+
+impl TagMatch {
+    pub fn description(&self) -> &str {
+        &self.tag.description
+    }
+
+    pub fn re(&self) -> &Regex {
+        &self.tag.re
+    }
+}
+
+lazy_static! {
+    pub static ref GENERAL_TAG: Tag = Tag {
+        re: Regex::new("NoMatchesForGeneral").unwrap(),
+        description: "General".into(),
+    };
 }
 
 pub fn tag_in(text: &str, tags: &Vec<Tag>) -> TagMatch {
     tags.iter()
         .filter_map(|tag| tag_and_component_given(tag, text))
         .last()
-        .unwrap()
+        .unwrap_or(TagMatch {
+            tag: GENERAL_TAG.to_owned(),
+            component: None,
+        })
 }
 
 fn tag_and_component_given(a_tag: &Tag, text: &str) -> Option<TagMatch> {
