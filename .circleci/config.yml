@@ -21,7 +21,6 @@ jobs:
       - run:
           name: Save Version
           command: target/release/chlog-rs --version | cut -d ' ' -f 2 > target/release/app-version
-      - run:
       - persist_to_workspace:
           root: ./target
           paths:
