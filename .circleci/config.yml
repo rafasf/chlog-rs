@@ -19,3 +19,22 @@ jobs:
           name: Package
           command: cargo build --release
 
+  publish-github-release:
+    docker:
+      - image: cibuilds/github:0.12
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run:
+          name: "Release"
+          command: |
+            VERSION=$(target/release/chlog-rs --version | cut -d ' ' -f 2)
+            cp target/release/chlog-rs target/release/chlog
+            ghr -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${VERSION} ./artifacts/target/release/chlog
+
+workflows:
+  version: 2
+  build-release:
+    jobs:
+      - build
+      - publish-github-release
