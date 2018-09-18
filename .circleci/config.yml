@@ -18,6 +18,10 @@ jobs:
       - run:
           name: Package
           command: cargo build --release
+          persist_to_workspace:
+            root: ./target
+            paths:
+              - release
 
   publish-github-release:
     docker:
@@ -28,9 +32,10 @@ jobs:
       - run:
           name: "Release"
           command: |
-            VERSION=$(target/release/chlog-rs --version | cut -d ' ' -f 2)
-            cp target/release/chlog-rs target/release/chlog
-            ghr -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${VERSION} ./artifacts/target/release/chlog
+            ls -al
+            VERSION=$(./artifacts/release/chlog-rs --version | cut -d ' ' -f 2)
+            cp ./artifacts/release/chlog-rs ./artifacts/release/chlog
+            ghr -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${VERSION} ./artifacts/release/chlog
 
 workflows:
   version: 2
