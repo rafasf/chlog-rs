@@ -71,13 +71,11 @@ fn extract_story_from(
     story_identifer: &str,
 ) -> result::Result<Story, Error> {
     match body {
-        Ok(result) => {
-            Ok(Story::new(
-                story_identifer,
-                Some(result.fields.summary.to_string()),
-                Some(format!("{}/browse/{}", url, story_identifer)),
-            ))
-        }
+        Ok(result) => Ok(Story::new(
+            story_identifer,
+            Some(result.fields.summary.to_string()),
+            Some(format!("{}/browse/{}", url, story_identifer)),
+        )),
         Err(e) => Err(Error::new(ErrorKind::Other, e)),
     }
 }

@@ -5,7 +5,7 @@ use std::io::prelude::*;
 use std::path::{Display, Path};
 
 use thelog::changelog::Changelog;
-use thelog::new_commit::Commit;
+use thelog::commit::Commit;
 use tracker::Tracker;
 
 pub fn create<'a>(
@@ -16,13 +16,11 @@ pub fn create<'a>(
     let file_path = Path::new(output_file.unwrap_or("CHANGELOG.md"));
     let file = match File::create(&file_path) {
         Ok(file) => file,
-        Err(e) => {
-            panic!(
-                "couldn't create file {}: {}",
-                file_path.display(),
-                e.description()
-            )
-        }
+        Err(e) => panic!(
+            "couldn't create file {}: {}",
+            file_path.display(),
+            e.description()
+        ),
     };
 
     write_title_into(&file, &changelog);

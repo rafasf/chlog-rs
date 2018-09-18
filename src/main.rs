@@ -3,14 +3,12 @@ extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
 
-
 extern crate ansi_term;
 extern crate clap;
 extern crate regex;
 
 use ansi_term::Style;
 use clap::{App, Arg};
-use regex::Regex;
 
 mod config;
 mod fmt;
@@ -23,9 +21,9 @@ use config::Config;
 use fmt::markdown;
 use show::*;
 use thelog::changelog::Changelog;
-use thelog::new_commit::{Commit, Commits};
-use thelog::tag::Tag;
+use thelog::commit::{Commit, Commits};
 use thelog::fetch_log;
+use thelog::tag::Tag;
 use tracker::tracker_for;
 
 fn main() {
@@ -39,24 +37,21 @@ fn main() {
                 .help("The path to the repository")
                 .required(true)
                 .takes_value(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("range")
                 .short("n")
                 .long("range")
                 .value_name("initial-hash..final-hash")
                 .help("Range of commits to include (using Git style from..to)")
                 .takes_value(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("file")
                 .short("f")
                 .long("file")
                 .value_name("changelog output file name")
                 .help("The name of the file to be created")
                 .takes_value(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("tracker")
                 .long("tracker")
                 .value_name("tracker name")
@@ -64,8 +59,7 @@ fn main() {
                 .help("Inform which tracker to be used")
                 .required(true)
                 .takes_value(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("tracker-url")
                 .long("tracker-url")
                 .value_name("tracker URL")
@@ -73,16 +67,14 @@ fn main() {
                 .takes_value(true)
                 .required(true)
                 .requires("tracker"),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("pattern")
                 .long("pattern")
                 .value_name("pattern regex")
                 .help("The story pattern")
                 .takes_value(true)
                 .required(true),
-        )
-        .get_matches();
+        ).get_matches();
 
     let repository_dir = matches.value_of("repository").unwrap();
     let range = match matches.value_of("range") {
@@ -112,9 +104,7 @@ fn main() {
 
     let commits: Commits = output
         .iter()
-        .map(|raw_commit| {
-            Commit::from(raw_commit, &config.separator, &tags)
-        })
+        .map(|raw_commit| Commit::from(raw_commit, &config.separator, &tags))
         .collect();
 
     let changelog_file = markdown::create(

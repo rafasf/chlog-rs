@@ -1,9 +1,7 @@
-use show::*;
 use std::process::Command;
 
 pub mod changelog;
 pub mod commit;
-pub mod new_commit;
 pub mod tag;
 
 pub struct LogMessage {

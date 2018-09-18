@@ -1,47 +1,33 @@
-extern crate regex;
-
-use self::regex::Regex;
+use thelog::tag::*;
 
 pub type Commits = Vec<Commit>;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Commit {
-    pub tag: String,
+    pub tag: TagMatch,
     pub hash: String,
     pub subject: String,
     pub author: String,
 }
 
 impl Commit {
-    pub fn from(raw_commit: &str, separator: &str, tags_re: &Regex) -> Self {
-        let raw_commit: Vec<&str> = raw_commit.split(separator).collect();
-        let (raw_subject, author, hash, body) =
-            (raw_commit[0], raw_commit[1], raw_commit[2], raw_commit[3]);
-        let subject_with_body = format!("{} {}", raw_subject, body);
+    pub fn from(raw_commit: &str, separator: &str, tags: &Vec<Tag>) -> Self {
+        let commit_parts = raw_commit.split(separator).collect::<Vec<&str>>();
+        let (subject, author, hash, body) = (
+            commit_parts[0],
+            commit_parts[1],
+            commit_parts[2],
+            commit_parts[3],
+        );
 
-        let possible_tag = match tags_re.captures(&subject_with_body) {
-            Some(tag) => {
-                tag.iter()
-                    .filter_map(|possible_tag| if possible_tag.is_some() {
-                        possible_tag
-                    } else {
-                        None
-                    })
-                    .last()
-            }
-            None => None,
-        };
-
-        let (tag, subject) = match possible_tag {
-            Some(tag) => (tag.as_str(), tags_re.replace(raw_subject, "").into_owned()),
-            None => ("", raw_subject.to_string()),
-        };
+        let tag_match = tag_in(&format!("{} {}", subject, body), tags);
+        let clean_subject = tag_match.re().replace(subject, "");
 
         Commit {
-            tag: tag.to_string(),
-            hash: hash.to_string(),
-            subject: subject.to_string(),
-            author: author.to_string(),
+            tag: tag_match,
+            hash: hash.into(),
+            subject: clean_subject.into_owned(),
+            author: author.into(),
         }
     }
 }
@@ -49,80 +35,66 @@ impl Commit {
 #[cfg(test)]
 mod test {
     use thelog::commit::*;
+    use thelog::tag::*;
 
     #[test]
-    fn creates_commit_from_string() {
-        let no_re = Regex::new(r"^none").unwrap();
-        let commit = Commit::from("Sample message here-author-hash-body", "-", &no_re);
+    fn creates_commit_from_string_with_general_tag() {
+        let commit = Commit::from("Sample message here-author-hash-body", "-", &vec![]);
         let expected_commit = Commit {
-            tag: "".to_string(),
+            tag: TagMatch {
+                tag: GENERAL_TAG.clone(),
+                component: None,
+            },
             hash: "hash".to_string(),
             subject: "Sample message here".to_string(),
             author: "author".to_string(),
         };
 
-        assert_eq!(expected_commit.tag, commit.tag);
+        assert_eq!(expected_commit.tag.description(), commit.tag.description());
         assert_eq!(expected_commit.hash, commit.hash);
         assert_eq!(expected_commit.subject, commit.subject);
         assert_eq!(expected_commit.author, commit.author);
     }
 
     #[test]
-    fn creates_commit_with_tag_from_string() {
-        let tags_re = Regex::new(r"(US\w+)\s*").unwrap();
-        let commit = Commit::from("US123 Sample message here|author|hash|body", "|", &tags_re);
+    fn creates_commit_with_matched_tag_in_subject() {
+        let tags = vec![
+            Tag::from(r"[chore]\s*", "Chore"),
+            Tag::from(r"(US\w+)\s*", "Story"),
+        ];
 
-        let expected_commit = Commit {
-            tag: "US123".to_string(),
-            hash: "hash".to_string(),
-            subject: "Sample message here".to_string(),
-            author: "author".to_string(),
-        };
+        let chore_commit = Commit::from("Sample message [chore]-author-hash-body here", "-", &tags);
+        let story_commit = Commit::from("Sample message-author-hash-Related to US123", "-", &tags);
 
-        assert_eq!(expected_commit.tag, commit.tag);
-        assert_eq!(expected_commit.hash, commit.hash);
-        assert_eq!(expected_commit.subject, commit.subject);
-        assert_eq!(expected_commit.author, commit.author);
+        assert_eq!("Chore", chore_commit.tag.description());
+        assert_eq!("Story", story_commit.tag.description());
     }
 
     #[test]
-    fn creates_commit_with_tag_from_body() {
-        let tags_re = Regex::new(r"(US\w+)\s*").unwrap();
-        let commit = Commit::from(
-            "Sample message here|author|hash|blah blah\nUS123",
-            "|",
-            &tags_re,
+    fn creates_commit_with_matched_tag_in_body() {
+        let tags = vec![
+            Tag::from(r"[chore]\s*", "Chore"),
+            Tag::from(r"(US\w+)\s*", "Story"),
+        ];
+
+        let story_commit = Commit::from("Sample message-author-hash-Related to US123", "-", &tags);
+
+        assert_eq!("Story", story_commit.tag.description());
+    }
+
+    #[test]
+    fn creates_commit_with_last_matched_tag_when_multiple() {
+        let tags = vec![
+            Tag::from(r"[chore]\s*", "Chore"),
+            Tag::from(r"(US\w+)\s*", "Story"),
+        ];
+
+        let story_commit = Commit::from(
+            "[chore] Sample message-author-hash-Related to US123",
+            "-",
+            &tags,
         );
 
-        let expected_commit = Commit {
-            tag: "US123".to_string(),
-            hash: "hash".to_string(),
-            subject: "Sample message here".to_string(),
-            author: "author".to_string(),
-        };
-
-        assert_eq!(expected_commit.tag, commit.tag);
-        assert_eq!(expected_commit.hash, commit.hash);
-        assert_eq!(expected_commit.subject, commit.subject);
-        assert_eq!(expected_commit.author, commit.author);
-    }
-
-    #[test]
-    fn creates_with_matching_tag_from_string() {
-        let tags_re = Regex::new(r"(US\w+)\s*|(feat):\s*|(chore):\s*").unwrap();
-        let commit_feat = Commit::from("feat: Sample message here|author|hash|body", "|", &tags_re);
-
-        let commit_story =
-            Commit::from("US123 Sample message here|author|hash|body", "|", &tags_re);
-
-        let commit_chore =
-            Commit::from("Sample message here|author|hash|body chore:", "|", &tags_re);
-
-        assert_eq!(commit_feat.tag, "feat");
-        assert_eq!(commit_feat.subject, "Sample message here");
-        assert_eq!(commit_story.tag, "US123");
-        assert_eq!(commit_story.subject, "Sample message here");
-        assert_eq!(commit_chore.tag, "chore");
-        assert_eq!(commit_chore.subject, "Sample message here");
+        assert_eq!("Story", story_commit.tag.description());
     }
 }

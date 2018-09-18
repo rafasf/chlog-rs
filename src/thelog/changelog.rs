@@ -2,9 +2,8 @@ extern crate chrono;
 extern crate regex;
 
 use self::chrono::prelude::*;
-use self::regex::Regex;
 use std::collections::{HashMap, HashSet};
-use thelog::new_commit::{Commit, Commits};
+use thelog::commit::{Commit, Commits};
 
 #[derive(Debug)]
 pub struct Changelog {
@@ -23,15 +22,16 @@ impl Changelog {
     }
 
     pub fn commits_by_tag(&self) -> HashMap<String, Vec<Commit>> {
-        let commits_by_tag = &self.commits.iter().fold(
-            HashMap::<String, Vec<Commit>>::new(),
-            |mut acc, commit| {
-                acc.entry(commit.tag.description().into())
-                    .or_insert(vec![])
-                    .push(commit.clone());
-                acc
-            },
-        );
+        let commits_by_tag =
+            &self
+                .commits
+                .iter()
+                .fold(HashMap::<String, Vec<Commit>>::new(), |mut acc, commit| {
+                    acc.entry(commit.tag.description().into())
+                        .or_insert(vec![])
+                        .push(commit.clone());
+                    acc
+                });
 
         commits_by_tag.clone()
     }
@@ -42,8 +42,7 @@ impl Changelog {
             .filter_map(|commit| match commit.tag.description() {
                 "Story" => commit.tag.component.clone(),
                 _ => None,
-            })
-            .map(|comp| comp.to_string())
+            }).map(|comp| comp.to_string())
             .collect::<HashSet<String>>()
     }
 }
@@ -53,7 +52,7 @@ mod test {
     use regex::Regex;
     use std::collections::{HashMap, HashSet};
     use thelog::changelog::Changelog;
-    use thelog::new_commit::Commit;
+    use thelog::commit::Commit;
     use thelog::tag::*;
 
     fn tag_match(description: &str, component: Option<String>) -> TagMatch {

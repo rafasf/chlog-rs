@@ -1,6 +1,7 @@
 extern crate ansi_term;
 
 use ansi_term::Colour::Red;
+
 use ansi_term::{ANSIGenericString, Style};
 
 pub fn show(text: String) {
