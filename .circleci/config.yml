@@ -18,6 +18,10 @@ jobs:
       - run:
           name: Package
           command: cargo build --release
+      - run:
+          name: Save Version
+          command: target/release/chlog-rs --version | cut -d ' ' -f 2 > target/release/app-version
+      - run:
       - persist_to_workspace:
           root: ./target
           paths:
@@ -34,7 +38,7 @@ jobs:
           command: |
             ls -al
             ls -al ./artifacts/release
-            ./artifacts/release/chlog-rs --version
+            VERSION=$(cat ./artifacts/release/app-version)
             cp ./artifacts/release/chlog-rs ./artifacts/release/chlog
             ghr -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${VERSION} ./artifacts/release/chlog
 
