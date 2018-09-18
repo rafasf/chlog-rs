@@ -99,4 +99,15 @@ mod test {
         assert_eq!(my_tag.tag.description, "Refactor");
         assert_eq!(my_tag.component, None);
     }
+
+    #[test]
+    fn tag_match_has_story_id_as_component_when_tag_is_story() {
+        let pattern = r"(US\w+)\s*";
+        let tag = Tag::from(pattern, "Story");
+
+        let my_tag = tag_in("My awesome commit message US098", &vec![tag]);
+
+        assert_eq!(my_tag.tag.description, "Story");
+        assert_eq!(my_tag.component, Some("US098".into()));
+    }
 }

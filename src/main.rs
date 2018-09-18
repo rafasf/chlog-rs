@@ -23,7 +23,8 @@ use config::Config;
 use fmt::markdown;
 use show::*;
 use thelog::changelog::Changelog;
-use thelog::commit::{Commit, Commits};
+use thelog::new_commit::{Commit, Commits};
+use thelog::tag::Tag;
 use thelog::fetch_log;
 use tracker::tracker_for;
 
@@ -97,10 +98,10 @@ fn main() {
 
     let config = Config::default();
 
-    let tags_pattern = vec![lookup_tracker.pattern().to_string(), config.tags_pattern()]
-        .join(&config.separator);
-
-    let tags_re = Regex::new(&tags_pattern).unwrap();
+    let tags = vec![
+        vec![Tag::from(lookup_tracker.pattern(), "Story")],
+        config.tags.clone(),
+    ].concat();
 
     show(format!(
         "Fetching log in {}",
@@ -112,7 +113,7 @@ fn main() {
     let commits: Commits = output
         .iter()
         .map(|raw_commit| {
-            Commit::from(raw_commit, &config.separator, &tags_re)
+            Commit::from(raw_commit, &config.separator, &tags)
         })
         .collect();
 

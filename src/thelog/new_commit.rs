@@ -1,13 +1,16 @@
 use thelog::tag::*;
 
-pub struct NewCommit {
+pub type Commits = Vec<Commit>;
+
+#[derive(Clone, Debug)]
+pub struct Commit {
     pub tag: TagMatch,
     pub hash: String,
     pub subject: String,
     pub author: String,
 }
 
-impl NewCommit {
+impl Commit {
     pub fn from(raw_commit: &str, separator: &str, tags: &Vec<Tag>) -> Self {
         let commit_parts = raw_commit.split(separator).collect::<Vec<&str>>();
         let (subject, author, hash, body) = (
@@ -20,7 +23,7 @@ impl NewCommit {
         let tag_match = tag_in(&format!("{} {}", subject, body), tags);
         let clean_subject = tag_match.re().replace(subject, "");
 
-        NewCommit {
+        Commit {
             tag: tag_match,
             hash: hash.into(),
             subject: clean_subject.into_owned(),
@@ -36,8 +39,8 @@ mod test {
 
     #[test]
     fn creates_commit_from_string_with_general_tag() {
-        let commit = NewCommit::from("Sample message here-author-hash-body", "-", &vec![]);
-        let expected_commit = NewCommit {
+        let commit = Commit::from("Sample message here-author-hash-body", "-", &vec![]);
+        let expected_commit = Commit {
             tag: TagMatch {
                 tag: GENERAL_TAG.clone(),
                 component: None,
@@ -60,10 +63,8 @@ mod test {
             Tag::from(r"(US\w+)\s*", "Story"),
         ];
 
-        let chore_commit =
-            NewCommit::from("Sample message [chore]-author-hash-body here", "-", &tags);
-        let story_commit =
-            NewCommit::from("Sample message-author-hash-Related to US123", "-", &tags);
+        let chore_commit = Commit::from("Sample message [chore]-author-hash-body here", "-", &tags);
+        let story_commit = Commit::from("Sample message-author-hash-Related to US123", "-", &tags);
 
         assert_eq!("Chore", chore_commit.tag.description());
         assert_eq!("Story", story_commit.tag.description());
@@ -76,8 +77,7 @@ mod test {
             Tag::from(r"(US\w+)\s*", "Story"),
         ];
 
-        let story_commit =
-            NewCommit::from("Sample message-author-hash-Related to US123", "-", &tags);
+        let story_commit = Commit::from("Sample message-author-hash-Related to US123", "-", &tags);
 
         assert_eq!("Story", story_commit.tag.description());
     }
@@ -89,7 +89,7 @@ mod test {
             Tag::from(r"(US\w+)\s*", "Story"),
         ];
 
-        let story_commit = NewCommit::from(
+        let story_commit = Commit::from(
             "[chore] Sample message-author-hash-Related to US123",
             "-",
             &tags,

@@ -5,7 +5,7 @@ use std::io::prelude::*;
 use std::path::{Display, Path};
 
 use thelog::changelog::Changelog;
-use thelog::commit::Commit;
+use thelog::new_commit::Commit;
 use tracker::Tracker;
 
 pub fn create<'a>(
@@ -26,11 +26,7 @@ pub fn create<'a>(
     };
 
     write_title_into(&file, &changelog);
-    write_story_summary_into(
-        &file,
-        &changelog.stories(&tracker.story_id_pattern()),
-        &tracker,
-    );
+    write_story_summary_into(&file, &changelog.stories(), &tracker);
     write_commits_into(&file, &changelog.commits_by_tag());
 
     file_path.display()
@@ -61,10 +57,7 @@ fn write_story_summary_into(
 
 fn write_commits_into(mut file: &File, commits_by_tag: &HashMap<String, Vec<Commit>>) {
     for (tag, commits) in commits_by_tag {
-        match tag.is_empty() {
-            true => writeln!(file, "\n#### General").unwrap(),
-            false => writeln!(file, "\n#### {}", tag).unwrap(),
-        };
+        writeln!(file, "\n#### {}", tag).unwrap();
 
         for commit in commits {
             writeln!(file, "* {}", commit.subject).unwrap();

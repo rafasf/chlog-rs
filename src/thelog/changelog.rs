@@ -4,7 +4,7 @@ extern crate regex;
 use self::chrono::prelude::*;
 use self::regex::Regex;
 use std::collections::{HashMap, HashSet};
-use thelog::commit::{Commit, Commits};
+use thelog::new_commit::{Commit, Commits};
 
 #[derive(Debug)]
 pub struct Changelog {
@@ -26,9 +26,9 @@ impl Changelog {
         let commits_by_tag = &self.commits.iter().fold(
             HashMap::<String, Vec<Commit>>::new(),
             |mut acc, commit| {
-                acc.entry(commit.tag.to_string()).or_insert(vec![]).push(
-                    commit.clone(),
-                );
+                acc.entry(commit.tag.description().into())
+                    .or_insert(vec![])
+                    .push(commit.clone());
                 acc
             },
         );
@@ -36,14 +36,15 @@ impl Changelog {
         commits_by_tag.clone()
     }
 
-    pub fn stories(&self, story_re: &Regex) -> HashSet<String> {
-        let stories: Vec<String> = self.commits
+    pub fn stories(&self) -> HashSet<String> {
+        self.commits
             .iter()
-            .filter(|commit| story_re.is_match(&commit.tag))
-            .map(|commit| commit.tag.clone())
-            .collect();
-
-        stories.into_iter().collect()
+            .filter_map(|commit| match commit.tag.description() {
+                "Story" => commit.tag.component.clone(),
+                _ => None,
+            })
+            .map(|comp| comp.to_string())
+            .collect::<HashSet<String>>()
     }
 }
 
@@ -52,63 +53,71 @@ mod test {
     use regex::Regex;
     use std::collections::{HashMap, HashSet};
     use thelog::changelog::Changelog;
-    use thelog::commit::Commit;
+    use thelog::new_commit::Commit;
+    use thelog::tag::*;
+
+    fn tag_match(description: &str, component: Option<String>) -> TagMatch {
+        TagMatch {
+            tag: Tag::from(".*", description),
+            component: component,
+        }
+    }
 
     #[test]
     fn returns_commits_grouped_by_tag() {
         let commits = vec![
             Commit {
-                tag: "t1".into(),
-                subject: "".into(),
+                tag: tag_match("t1", None),
+                subject: "t1 commit".into(),
                 author: "".into(),
                 hash: "".into(),
             },
             Commit {
-                tag: "t2".into(),
-                subject: "".into(),
+                tag: tag_match("t2", None),
+                subject: "t2 commit".into(),
                 author: "".into(),
                 hash: "".into(),
             },
             Commit {
-                tag: "t1".into(),
-                subject: "".into(),
+                tag: tag_match("t1", None),
+                subject: "another t1 commit".into(),
                 author: "".into(),
                 hash: "".into(),
             },
         ];
-        let changelog = Changelog::create(commits.clone(), "");
+        let commits_by_tag = Changelog::create(commits.clone(), "").commits_by_tag();
 
-        let mut expected_groups = HashMap::new();
-        expected_groups.insert("t1".into(), vec![commits[0].clone(), commits[2].clone()]);
-        expected_groups.insert("t2".into(), vec![commits[1].clone()]);
-
-        assert_eq!(expected_groups, changelog.commits_by_tag());
+        assert_eq!(commits_by_tag.get("t1").unwrap()[0].subject, "t1 commit");
+        assert_eq!(
+            commits_by_tag.get("t1").unwrap()[1].subject,
+            "another t1 commit"
+        );
+        assert_eq!(commits_by_tag.get("t2").unwrap()[0].subject, "t2 commit");
     }
 
     #[test]
     fn returns_unique_stories_given_a_pattern() {
-        let story_re = Regex::new(r"^(US\w+)").unwrap();
         let commits = vec![
             Commit {
-                tag: "US0192".into(),
+                tag: tag_match("Story", Some("US0192".into())),
                 subject: "".into(),
                 author: "".into(),
                 hash: "".into(),
             },
             Commit {
-                tag: "doc".into(),
+                tag: tag_match("doc", None),
                 subject: "".into(),
                 author: "".into(),
                 hash: "".into(),
             },
             Commit {
-                tag: "US213".into(),
+                tag: tag_match("Story", Some("US213".into())),
                 subject: "".into(),
                 author: "".into(),
                 hash: "".into(),
             },
             Commit {
-                tag: "US0192".into(),
+                tag: tag_match("Story", Some("US0192".into())),
                 subject: "".into(),
                 author: "".into(),
                 hash: "".into(),
@@ -120,6 +129,6 @@ mod test {
         let expected_stories: HashSet<String> =
             vec!["US0192".into(), "US213".into()].into_iter().collect();
 
-        assert_eq!(expected_stories, changelog.stories(&story_re));
+        assert_eq!(expected_stories, changelog.stories());
     }
 }

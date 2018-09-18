@@ -6,6 +6,13 @@ pub mod commit;
 pub mod new_commit;
 pub mod tag;
 
+pub struct LogMessage {
+    pub subject: String,
+    pub author: String,
+    pub hash: String,
+    pub body: String,
+}
+
 pub fn fetch_log(repository_dir: &str, format: &str, range: &str) -> Vec<String> {
     let git_dir = if repository_dir.contains(".git") {
         repository_dir.to_string()
