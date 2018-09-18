@@ -33,7 +33,7 @@ jobs:
           name: "Release"
           command: |
             ls -al
-            ls -al ./artifacts
+            ls -al ./artifacts/release
             VERSION=$(./artifacts/release/chlog-rs --version | cut -d ' ' -f 2)
             cp ./artifacts/release/chlog-rs ./artifacts/release/chlog
             ghr -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${VERSION} ./artifacts/release/chlog
