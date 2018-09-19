@@ -1,4 +1,4 @@
-# chlog-rs [![CircleCI](https://circleci.com/gh/rafasf/chlog-rs.svg?style=svg)](https://circleci.com/gh/rafasf/chlog-rs)
+# chlog-rs ![CircleCI branch](https://img.shields.io/circleci/project/github/rafasf/chlog-rs/master.svg?style=flat-square) [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/rafasf/chlog-rs/blob/master/LICENSE) ![GitHub release](https://img.shields.io/github/release/rafasf/chlog-rs.svg?style=flat-square)
 
 Many projects will have messages with the story identifier as part of the commit
 message (e.g. `StoryId Commit message here`).
@@ -23,7 +23,7 @@ stories.
 Changelog 0.1.0
 
 USAGE:
-    chlog-rs [OPTIONS] --pattern <pattern regex> --repository <repository path> --tracker <tracker name> --tracker-url <tracker URL>
+    chlog [OPTIONS] --repository <repository path>
 
 FLAGS:
     -h, --help       Prints help information
