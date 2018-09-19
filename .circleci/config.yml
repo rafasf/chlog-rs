@@ -20,7 +20,12 @@ jobs:
           command: cargo build --release
       - run:
           name: Save Version
-          command: target/release/chlog-rs --version | cut -d ' ' -f 2 > target/release/app-version
+          command: target/release/chlog --version | cut -d ' ' -f 2 > target/release/app-version
+      - run:
+          name: Create Changelog
+          command: |
+            target/release/chlog -r . --range $(git describe --abbrev=0 --tags)..${CIRCLE_SHA1} --tracker jira --tracker-url http://localhost --pattern "FAKE-\\w+"
+            cp CHANGELOG.md target/release/
       - persist_to_workspace:
           root: ./target
           paths:
@@ -36,8 +41,15 @@ jobs:
           name: "Release"
           command: |
             VERSION=$(cat ./artifacts/release/app-version)
-            cp ./artifacts/release/chlog-rs ./artifacts/release/chlog
-            ghr -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/release/chlog
+            ARTIFACT="chlog-v${VERSION}.tar.gz"
+            tar czf "./artifacts/${ARTIFACT}" -C ./artifacts/release chlog
+            ghr -t ${GH_TOKEN} \
+              -u ${CIRCLE_PROJECT_USERNAME} \
+              -r ${CIRCLE_PROJECT_REPONAME} \
+              -c ${CIRCLE_SHA1} \
+              -b $(cat ./artifacts/CHANGELOG.md) \
+              -delete \
+              ${VERSION} "./artifacts/${ARTIFACT}"
 
 workflows:
   version: 2
