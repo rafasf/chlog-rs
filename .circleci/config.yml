@@ -42,7 +42,7 @@ jobs:
           command: |
             VERSION=$(cat ./artifacts/release/app-version)
             ARTIFACT="chlog-v${VERSION}.tar.gz"
-            BODY=$(cat .artifacts/release/CHANGELOG.md)
+            BODY=$(cat ./artifacts/release/CHANGELOG.md)
             tar czf "./artifacts/${ARTIFACT}" -C ./artifacts/release chlog
             ghr -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "${BODY}" -delete ${VERSION} "./artifacts/${ARTIFACT}"
 
