@@ -12,8 +12,6 @@ use std::io::{Error, ErrorKind};
 use story::Story;
 use tracker::Tracker;
 
-const URL: &str = "https://rally1.rallydev.com/slm/webservice/v2.0/hierarchicalrequirement";
-
 #[derive(Deserialize, Debug)]
 struct Result {
     #[serde(rename = "Name")]
@@ -62,13 +60,15 @@ impl QueryResponse {
 pub struct Rally {
     client: Client,
     pattern: String,
+    url: String,
 }
 
 impl Rally {
-    pub fn new(client: Client, _url: String, pattern: String) -> Box<Tracker + 'static> {
+    pub fn new(client: Client, url: String, pattern: String) -> Box<Tracker + 'static> {
         Box::new(Rally {
             client: client,
             pattern: pattern,
+            url: url,
         })
     }
 }
@@ -84,14 +84,14 @@ impl Tracker for Rally {
 
     fn details_of(&self, story_identifer: &str) -> Story {
         let query_url = format!(
-            "{}?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
-            URL, story_identifer
+            "{}/slm/webservice/v2.0/hierarchicalrequirement?fetch=FormattedID,Name,ObjectID&query=(FormattedID%20%3D%20{})",
+            &self.url, story_identifer
         );
 
         let response = self.client.get(&query_url).send();
 
         let story = match response {
-            Ok(mut resp) => extract_story_from(resp.json()),
+            Ok(mut resp) => extract_story_from(resp.json(), &self.url),
             Err(e) => Err(Error::new(ErrorKind::Other, e)),
         };
 
@@ -99,11 +99,14 @@ impl Tracker for Rally {
     }
 }
 
-fn extract_story_from(body: reqwest::Result<QueryResponse>) -> result::Result<Story, Error> {
+fn extract_story_from(
+    body: reqwest::Result<QueryResponse>,
+    url: &str,
+) -> result::Result<Story, Error> {
     match body {
         Ok(result) => {
             if result.has_results() {
-                Ok(create_story_from(&result))
+                Ok(create_story_from(&result, url))
             } else {
                 Err(Error::new(ErrorKind::Other, "no stories were found"))
             }
@@ -112,12 +115,13 @@ fn extract_story_from(body: reqwest::Result<QueryResponse>) -> result::Result<St
     }
 }
 
-fn create_story_from(response: &QueryResponse) -> Story {
+fn create_story_from(response: &QueryResponse, url: &str) -> Story {
     Story::new(
         response.id(),
         Some(response.name().to_string()),
         Some(format!(
-            "https://rally1.rallydev.com/#/detail/userstory/{}",
+            "{}/#/detail/userstory/{}",
+            url,
             response.internal_id()
         )),
     )
