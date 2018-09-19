@@ -35,7 +35,6 @@ impl Commit {
 #[cfg(test)]
 mod test {
     use thelog::commit::*;
-    use thelog::tag::*;
 
     #[test]
     fn creates_commit_from_string_with_general_tag() {

@@ -1,5 +1,4 @@
 extern crate chrono;
-extern crate regex;
 
 use self::chrono::prelude::*;
 use std::collections::{HashMap, HashSet};
@@ -49,8 +48,7 @@ impl Changelog {
 
 #[cfg(test)]
 mod test {
-    use regex::Regex;
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashSet;
     use thelog::changelog::Changelog;
     use thelog::commit::Commit;
     use thelog::tag::*;

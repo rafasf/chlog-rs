@@ -37,16 +37,19 @@ pub fn tracker_for(
 mod test {
     use tracker::*;
 
+    #[test]
     fn creates_jira() {
         let tracker = tracker_for("jira", "http://jira.com", "Prefix-1".into()).unwrap();
         assert_eq!("Prefix-1".to_string(), tracker.pattern())
     }
 
+    #[test]
     fn creates_rally() {
         let tracker = tracker_for("rally", "http://rally.com", "Prefix-1".into()).unwrap();
         assert_eq!("Prefix-1".to_string(), tracker.pattern())
     }
 
+    #[test]
     fn returns_none_when_not_supported() {
         let tracker = tracker_for("shiny", "http://shiny.com", "Prefix-1".into());
         assert!(tracker.is_none())
