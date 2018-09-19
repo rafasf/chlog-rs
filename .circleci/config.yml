@@ -44,7 +44,7 @@ workflows:
   build-release:
     jobs:
       - build
-      - release-it
+      - release-it:
           type: approval
           requires:
             - build
