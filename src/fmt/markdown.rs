@@ -10,7 +10,7 @@ use tracker::Tracker;
 
 pub fn create<'a>(
     changelog: &Changelog,
-    tracker: Box<Tracker>,
+    tracker: Option<Box<Tracker>>,
     output_file: Option<&'a str>,
 ) -> Display<'a> {
     let file_path = Path::new(output_file.unwrap_or("CHANGELOG.md"));
@@ -24,7 +24,9 @@ pub fn create<'a>(
     };
 
     write_title_into(&file, &changelog);
-    write_story_summary_into(&file, &changelog.stories(), &tracker);
+    if tracker.is_some() {
+        write_story_summary_into(&file, &changelog.stories(), &tracker.unwrap());
+    }
     write_commits_into(&file, &changelog.commits_by_tag());
 
     file_path.display()
