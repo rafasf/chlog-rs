@@ -1,21 +1,40 @@
 # chlog-rs [![CircleCI branch](https://img.shields.io/circleci/project/github/rafasf/chlog-rs/master.svg?style=flat-square)](https://circleci.com/gh/rafasf/chlog-rs) [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/rafasf/chlog-rs/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/rafasf/chlog-rs.svg?style=flat-square)](https://github.com/rafasf/chlog-rs/releases)
 
-Many projects will have messages with the story identifier as part of the commit
-message (e.g. `StoryId Commit message here`).
+Projects that put story identifiers in commits now can generate a Changelog
+focused on that. Have it available for the team, quickly craft a message to
+share the deployment (or release) changes as well as adding it to the project's
+`CHANGELOG.md`.
 
-This tool will create a "Story Summary." section listing the unique stories, its
-titles with a link to the issue tracker followed by a section with the commits
-that don't belong to any of those and lastly the commits within each of the
-stories.
+Besides creating the **Story Summary**, it will have a list of all the commits
+that were made for the range provided grouped by its respective tags.
 
 ## Supported Trackers
 
-* Jira
-* Rally
-
-## Requirements
+### Requirements
 
 * `TRACKER_USER` and `TRACKER_PWD` environment variables to be available
+
+
+### Jira
+
+* Appends `/rest/api/latest/issue/` to `<tracker-url>` for story look-up
+* Always creates story link using `<tracker-url>` (i.e.
+  `<tracker-url>/browse/<story-id>`)
+
+### Rally
+
+* Appends `/slm/webservice/v2.0/hierarchicalrequirement` to `<tracker-url>` for story look-up
+* Only creates story link when look-up was successful (i.e.
+  `<tracker-url>/#/detail/userstory/<story-id>`)
+
+## General Tags
+
+* `ci`, `ci(component)`
+* `chore`, `chore(component)`
+* `doc`, `doc(component)`
+* `feat`, `feat(component)`
+* `refactor`, `refactor(component)`
+* `style`, `style(component)`
 
 ## Usage
 
