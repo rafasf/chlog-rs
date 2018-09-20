@@ -1,4 +1,4 @@
-# chlog-rs [![Travis CI](https://img.shields.io/travis/rafasf/chlog-rs/master.svg)](https://travis-ci.org/rafasf/chlog-rs) [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/rafasf/chlog-rs/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/rafasf/chlog-rs.svg?style=flat-square)](https://github.com/rafasf/chlog-rs/releases)
+# chlog-rs [![Travis CI](https://img.shields.io/travis/rafasf/chlog-rs/master.svg?style=flat-square)](https://travis-ci.org/rafasf/chlog-rs) [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/rafasf/chlog-rs/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/rafasf/chlog-rs.svg?style=flat-square)](https://github.com/rafasf/chlog-rs/releases)
 
 Projects that put story identifiers in commits now can generate a Changelog
 focused on that. Have it available for the team, quickly craft a message to
