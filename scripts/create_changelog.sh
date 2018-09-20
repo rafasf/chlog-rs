@@ -3,11 +3,9 @@
 set -ex
 
 main() {
-    target/release/chlog \
+    cargo run -- \
         --repository . \
         --range $(git describe --abbrev=0 --tags)..${TRAVIS_COMMIT}
-
-    cat CHANGELOG.md
 }
 
 main
