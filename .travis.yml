@@ -1,0 +1,71 @@
+# Based on the "trust" template v0.1.2
+# https://github.com/japaric/trust/tree/v0.1.2
+
+dist: trusty
+language: rust
+services: docker
+sudo: required
+
+env:
+  global:
+    - CRATE_NAME=chlog
+
+matrix:
+  include:
+    - env: TARGET=x86_64-unknown-linux-gnu
+    - env: TARGET=x86_64-unknown-linux-musl
+
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+
+    # Windows
+    - env: TARGET=x86_64-pc-windows-gnu
+
+    # Testing other channels
+    #- env: TARGET=x86_64-unknown-linux-gnu
+    #  rust: nightly
+    #- env: TARGET=x86_64-apple-darwin
+    #  os: osx
+    #  rust: nightly
+
+before_install:
+  - set -e
+  - rustup self update
+
+install:
+  - sh scripts/install.sh
+  - source ~/.cargo/env || true
+
+script:
+  - bash scripts/script.sh
+  - bash scripts/create_changelog.sh
+
+after_script:
+  - set +e
+
+before_deploy:
+  - sh scripts/before_deploy.sh
+
+deploy:
+  api_key:
+    secure: bF1tspwrtN5rM1GDuRO/hzRqaP/4LLxC3BF9iUS2Euv8dRwh1iZxRrMoA3BJ8Csb/Ivngg0/CvEFpQF0bJfXxekmkEqa1YhEOak1TXcvEhBa6rd6StTPZ+nDtTsKQjvHE3lLqREm+sJBxadoBCubkVLOxeTBhsT7G01C90p+I+r+n2ZIO/bhL/TTuU549AZ7EnEOUVPPbehKSn5PyI1BxxbBeZnIcNRJcrwegAOD9VMKD0PPnBSIVdnM6iAZRIULQPIgyWA5RcX1vbduyyw1GxdNrt8BRKhgzFjTeQDSLArVXzauyYXeCV32lU4Is4z2UzHXnGXE5TgPxa4/ADSFZBv9NdQAhSCbZ4AYsxqFEoGRJZOt206zeZS253tGg7WqS06Jf8Oa1eG/cAuxcZ7i1Q8JeZ9N/87VRr1G9v5Rdf3bJOOQZX6+GRE0tbfw8HRDXrU0lKV1kmr7mmVBqLXQ/VBn8f6TuBNkhtzeDAnOyDkEU14e5KxpJg4fEscNMzUmqQTr0nDDmgy0VjZkajTzkpJAn4J4z4QdJmvyGM/vf0QyP/R7W6OhMqHfOLD7+2KKkLlBqeKg0OQThytNjnyVWTvbSELgn1WQCEOrpzkbqscr3mPUZujKiFUqf0kVJy5X4DwH3c34LJEd6saGOOCRUGJ6J/4/8OIyN9qw7hU++jw=
+  file_glob: true
+  file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
+  on:
+    condition: $TRAVIS_RUST_VERSION = stable
+    tags: true
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
+before_cache:
+  # Travis can't cache files that are not readable by "others"
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    on_success: never
