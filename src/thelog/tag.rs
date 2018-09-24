@@ -1,6 +1,7 @@
 extern crate regex;
 
 use self::regex::Regex;
+use std::vec::Vec;
 
 #[derive(Clone, Debug)]
 pub struct Tag {

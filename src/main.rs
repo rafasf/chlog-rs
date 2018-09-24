@@ -2,24 +2,25 @@
 extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate log;
 
 extern crate ansi_term;
 extern crate clap;
 extern crate regex;
+extern crate simplelog;
 
-use ansi_term::Style;
 use clap::{App, Arg, ArgMatches};
+use simplelog::*;
 
 mod config;
 mod fmt;
-mod show;
 mod story;
 mod thelog;
 mod tracker;
 
 use config::Config;
 use fmt::markdown;
-use show::*;
 use thelog::changelog::Changelog;
 use thelog::commit::{Commit, Commits};
 use thelog::fetch_log;
@@ -27,6 +28,11 @@ use thelog::tag::Tag;
 use tracker::{tracker_for, Tracker};
 
 fn main() {
+    let log_level = std::env::var("RUST_LOG").unwrap_or("info".into());
+    CombinedLogger::init(vec![
+        TermLogger::new(log_level.parse().unwrap(), simplelog::Config::default()).unwrap(),
+    ]).unwrap();
+
     let matches = App::new("Changelog")
         .version("0.1.0")
         .arg(
@@ -84,10 +90,9 @@ fn main() {
     let lookup_tracker = tracker_given(&matches);
     let tags = tags_given(&lookup_tracker, &config);
 
-    show(format!(
-        "Fetching log in {}",
-        Style::new().bold().paint(repository_dir)
-    ));
+    info!("Repository: {}", repository_dir);
+    debug!("Range: {}", range);
+    debug!("Tags: {:?}", tags);
 
     let commits: Commits = fetch_log(&repository_dir, &config.format, &range)
         .iter()
@@ -100,10 +105,7 @@ fn main() {
         matches.value_of("file"),
     );
 
-    show(format!(
-        "{} created!",
-        Style::new().bold().paint(changelog_file.to_string())
-    ));
+    info!("{} created!", changelog_file.to_string());
 }
 
 /// Creates a tracker if a names was provided.
@@ -119,7 +121,10 @@ fn tracker_given(matches: &ArgMatches) -> Option<Box<Tracker + 'static>> {
 
             tracker_for(tracker_name, tracker_url, story_pattern)
         }
-        None => None,
+        None => {
+            warn!("Story links will not be created since a tracker wasn't provided");
+            None
+        }
     }
 }
 

@@ -5,11 +5,10 @@ use self::reqwest::header::{Authorization, Basic, Headers};
 use self::reqwest::{Client, Proxy};
 use std::env;
 
-use show::*;
-
 pub fn http_client_for(url: &str, username_var: &str, password_var: &str) -> Client {
     let mut client = Client::builder();
     if let Some(proxy) = env_proxy::for_url_str(&url).to_string() {
+        info!("Proxy: {}", proxy);
         client.proxy(Proxy::all(&proxy).unwrap());
     }
 
@@ -28,7 +27,7 @@ fn credentials(username_var: &str, password_var: &str) -> Option<Headers> {
         let mut headers = Headers::new();
         let user = username.unwrap();
 
-        show(format!("Using {} to fetch information from tracker", user));
+        info!("Using {} to fetch information from tracker", user);
 
         headers.set(Authorization(Basic {
             username: user,
