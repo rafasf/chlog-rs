@@ -1,3 +1,4 @@
+extern crate env_proxy;
 extern crate reqwest;
 
 use self::reqwest::header::{Authorization, Basic, Headers};
@@ -6,12 +7,10 @@ use std::env;
 
 use show::*;
 
-pub fn http_client(username_var: &str, password_var: &str) -> Client {
+pub fn http_client_for(url: &str, username_var: &str, password_var: &str) -> Client {
     let mut client = Client::builder();
-
-    if let Some(proxy) = proxy_config() {
-        show(format!("Using proxy: {:?}", proxy));
-        client.proxy(proxy);
+    if let Some(proxy) = env_proxy::for_url_str(&url).to_string() {
+        client.proxy(Proxy::all(&proxy).unwrap());
     }
 
     if let Some(headers) = credentials(username_var, password_var) {
@@ -19,21 +18,6 @@ pub fn http_client(username_var: &str, password_var: &str) -> Client {
     }
 
     client.build().unwrap()
-}
-
-pub fn http_client_no_proxy(username_var: &str, password_var: &str) -> Client {
-    let mut client = Client::builder();
-
-    if let Some(headers) = credentials(username_var, password_var) {
-        client.default_headers(headers);
-    }
-
-    client.build().unwrap()
-}
-fn proxy_config() -> Option<Proxy> {
-    env::var("http_proxy")
-        .map(|value| Proxy::all(&value).unwrap())
-        .ok()
 }
 
 fn credentials(username_var: &str, password_var: &str) -> Option<Headers> {

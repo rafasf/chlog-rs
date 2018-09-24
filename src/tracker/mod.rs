@@ -20,12 +20,12 @@ pub fn tracker_for(
 ) -> Option<Box<Tracker + 'static>> {
     match tracker_name {
         "jira" => Some(jira::Jira::new(
-            client::http_client_no_proxy("TRACKER_USER", "TRACKER_PWD"),
+            client::http_client_for(&tracker_url, "TRACKER_USER", "TRACKER_PWD"),
             tracker_url.to_string(),
             story_pattern,
         )),
         "rally" => Some(rally::Rally::new(
-            client::http_client("TRACKER_USER", "TRACKER_PWD"),
+            client::http_client_for(&tracker_url, "TRACKER_USER", "TRACKER_PWD"),
             tracker_url.to_string(),
             story_pattern,
         )),
